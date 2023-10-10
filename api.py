@@ -1,21 +1,50 @@
-from fastapi import FastAPI, Header
-from pymongo import MongoClient
+import urllib.request, json
+import pandas as pd
+# import streamlit as st
+import os
 
+try:
+    url = "https://api.artdatabanken.se/species-observation-system/v1/Observations/Search?skip=0&take=100&sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false"
 
+    # Request headers
+    hdr ={
+    'X-Api-Version': '1.5',
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
+    }
 
-# Create a FastAPI instance
-app = FastAPI()
+    # Request body
+    data = {
+        "output": {
+            "fields": [
+                "taxon.vernacularName", 
+                "taxon.id",
+                "event.startDate",
+                "event.endDate",
+                "location.decimalLatitude",
+                "location.decimalLongitude"
+            ]
+        },
+        "date": {
+            "startDate": "2023-01-01",
+            "endDate": "2023-12-31",
+            "dateFilterType": "OverlappingStartDateAndEndDate",
+        },
+        "taxon": {
+            "ids": [100090],
+        }
+    }
+    data = json.dumps(data)
+    req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
 
-# Create a PyMongo client and connect to MongoDB database
-client = MongoClient("mongodb+srv://<username>:<password>@https://api.artdatabanken.se/species-observation-system/v1/api/ApiInfo?retryWrites=true&w=majority")
-db = client.api/ApiInfo
-collection = db.<collection>
+    req.get_method = lambda: 'POST'
+    
+    # Send HTTP request and load response into pandas dataframe
+    response = urllib.request.urlopen(req)
+    df = pd.read_json(response)
 
-@app.get("/data")
-async def get_data(api_key: str = Header(None)):
-    if api_key != "YOUR_API_KEY":
-        return {"error": "Invalid API Key"}
-    data = []
-    for document in collection.find():
-        data.append(document)
-    return data
+    # Save pandas dataframe to csv
+    df.to_csv('data.csv', index=False)
+except Exception as e:
+    print(e)

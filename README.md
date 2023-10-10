@@ -1,4 +1,2 @@
-API
-https://github.com/biodiversitydata-se/SOS/blob/master/Docs/SearchFilter.md
-
-Behöver åtkomst från https://api-portal.artdatabanken.se/
+# API
+Proof of concept. Script queries Species Observation System API and pulls the first 100 observations of spotted nutcracker in the year 2023. It then stores it in a Pandas dataframe and saves the data to data.csv.
