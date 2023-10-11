@@ -1,2 +1,5 @@
-# API
-Proof of concept. Script queries Species Observation System API and pulls the first 100 observations of spotted nutcracker in the year 2023. It then stores it in a Pandas dataframe and saves the data to data.csv.
+
+# Data handling and visualisation
+
+Proof of concept. Handled incoming .csv data from the API integration and organized the data using pandas functions in order to try to categorize the data further, in order to allow us to visually plot it using PyDeck functions which streamlit inherently favors.
+
