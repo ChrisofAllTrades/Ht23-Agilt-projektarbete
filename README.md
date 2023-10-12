@@ -24,4 +24,4 @@ SET DEFAULT nextval('observations_id_seq');
 It adds an automatic sequencer to the id column since it's lacking in the data. If it's missing, the script will try to import it into the id column and will throw an error.
 
 # TO DO
-- Remove FastAPI and pymongo
+- Recreate Pipfile (new environment and run needed installs)
