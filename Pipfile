@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "*"
 pymongo = "*"
+pandas = "*"
 
 [dev-packages]
 
