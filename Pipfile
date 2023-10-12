@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "==0.103.2"
-pymongo = "==4.5.0"
 pandas = "==2.1.1"
 altair = "==5.1.2"
 annotated-types = "==0.6.0"
@@ -63,6 +61,7 @@ watchdog = "==3.0.0"
 zipp = "==3.17.0"
 
 [dev-packages]
+install = "*"
 
 [requires]
 python_version = "3.11"
