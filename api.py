@@ -24,7 +24,7 @@ def taxon_list():
         response = urllib.request.urlopen(req)
         df = pd.read_json(response)
 
-        df.to_csv('taxon_list.csv', index=False)
+        df.to_json('taxon_list.json', index=False)
 
     except Exception as e:
         print(e)
