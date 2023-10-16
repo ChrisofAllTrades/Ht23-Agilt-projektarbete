@@ -2,35 +2,9 @@ import urllib.request, json
 import pandas as pd
 import os
 
-def taxon_list():
+def get_observations():
     try:
-        url = "https://api.artdatabanken.se/taxonlistservice/v1/taxa"
-        
-        hdr ={
-            # Request headers
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-            }
-
-        data = {
-            "conservationListIds": [245],
-            "outputFields": ["id", "scientificname", "swedishname", "englishname"]
-            }
-
-        data = json.dumps(data)
-        req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
-        req.get_method = lambda: 'POST'
-        response = urllib.request.urlopen(req)
-        df = pd.read_json(response)
-
-        df.to_json('taxon_list.json', index=False)
-
-    except Exception as e:
-        print(e)
-
-def test_query():
-    try:
+        # Change it so the parameters are passed in as arguments instead of in the url
         url = "https://api.artdatabanken.se/species-observation-system/v1/Observations/Search?skip=0&take=100&sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false"
 
         # Request headers
@@ -59,7 +33,7 @@ def test_query():
                 "dateFilterType": "OverlappingStartDateAndEndDate",
             },
             "taxon": {
-                "ids": [100090, ],
+                "ids": [4000104],
             }
         }
         data = json.dumps(data)
@@ -71,9 +45,7 @@ def test_query():
         response = urllib.request.urlopen(req)
         df = pd.read_json(response)
 
-        # Save pandas dataframe to csv
-        df.to_csv('data.csv', index=False)
+        # Save pandas dataframe to json
+        df.to_json('obesrvations.json', index=False)
     except Exception as e:
         print(e)
-
-# taxon_list()
