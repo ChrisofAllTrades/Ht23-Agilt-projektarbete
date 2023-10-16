@@ -5,8 +5,8 @@ import os
 def get_observations():
     try:
         # Change it so the parameters are passed in as arguments instead of in the url
-        # &sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false
-        url = "https://api.artdatabanken.se/species-observation-system/v1/Observations/Search?take=100"
+        # take=100&sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false
+        url = "https://api.artdatabanken.se/species-observation-system/v1/Observations/Search"
 
         # Request headers
         hdr ={
@@ -14,6 +14,7 @@ def get_observations():
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
         'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
+        'take': '100',
         }
 
         # Request body
