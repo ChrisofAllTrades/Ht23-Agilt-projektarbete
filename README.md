@@ -1,2 +1,4 @@
 # API
-Proof of concept. Script queries Species Observation System API and pulls the first 100 observations of spotted nutcracker in the year 2023. It then stores it in a Pandas dataframe and saves the data to data.csv.
+Queries SOS API for taxa and observation data and stores it in a database for querying.
+
+### Remove FastAPI and pymongo ###
