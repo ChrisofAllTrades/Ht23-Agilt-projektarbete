@@ -143,6 +143,16 @@ class FenologikDb:
 
         session.close()
 
+    def table_id_sequence(self):
+        engine = self.engine
+
+        with engine.connect() as conn:
+            conn.execute(text("""
+                ALTER TABLE observations 
+                ALTER COLUMN id 
+                SET DEFAULT nextval('observations_id_seq');
+            """))
+
 ################################
 ### Add query functions here ###
 ################################
