@@ -1,8 +1,27 @@
-# Fenologik Proof of Concept
-Streamlit app that pulls observations of birds from the [Species Observation System API](https://github.com/biodiversitydata-se/SOS) and plots it on a map.
+# API
+Queries SOS API for taxa and observation data and stores it in a database for querying.
 
-## API
-Script queries SOS API and pulls the first 100 observations of spotted nutcracker in the year 2023. It then stores it in a Pandas dataframe and saves the data to data.csv.
+## Database Setup
+1. Start your PostgreSQL service.
+2. Create a new PostgreSQL database.
+3. Set your database URL as an environment variable. Replace `username`, `password`, and `yourdatabase` with your PostgreSQL username, password, and the name of the database you created.
 
-## Data handling and visualisation
-Handled incoming .csv data from the API integration and organized the data using pandas functions in order to try to categorize the data further, in order to allow us to visually plot it using PyDeck functions which streamlit inherently favors.
+```bash
+export DATABASE_URL=postgresql://username:password@localhost:5432/yourdatabase
+```
+
+4. Seed the taxa table and manually set id column to not NULL and primary key, and scientificName to not NULL in pgAdmin
+5. Run the Python script to create the tables in your database.
+
+NOTE! Before seeding the observations table, you need to run the following query in pgAdmin:
+
+```SQL
+ALTER TABLE observations 
+ALTER COLUMN id 
+SET DEFAULT nextval('observations_id_seq');
+```
+
+It adds an automatic sequencer to the id column since it's lacking in the data. If it's missing, the script will try to import it into the id column and will throw an error.
+
+# TO DO
+- Remove FastAPI and pymongo
