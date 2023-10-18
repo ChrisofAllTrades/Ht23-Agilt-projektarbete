@@ -7,6 +7,7 @@ import os
 ### Functions for collecting observation data from SOS API ###
 ##############################################################
 
+# CHANGE: Function to update database with new observations
 def get_observations():
     try:
         # Change it so the parameters are passed in as arguments instead of in the url
@@ -19,7 +20,7 @@ def get_observations():
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-            # 'take': '2500'
+            # 'take': '1000'
         }
 
         # Request body
@@ -44,7 +45,8 @@ def get_observations():
             }
         }
         data = json.dumps(data)
-        req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
+        # req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
+        req = urllib.request.Request(url, headers=hdr)
         req.get_method = lambda: 'POST'
 
         # Send HTTP request and load response into pandas dataframe
@@ -53,14 +55,16 @@ def get_observations():
     except Exception as e:
         print(e)
 
-def transform_observations():
+def transform_observations(json_data, table_name, file_name):
     try:
-        df = pd.read_json(get_observations())
+        df = pd.read_json(json_data)
         df = pd.json_normalize(df['records'], max_level=1)
-        df.to_csv('testing/observations.csv', index=False)
+        # CHANGE: File path when populating with whole dataset
+        df.to_csv(file_name, index=False)
     except Exception as e:
         print(e)
 
+# CHANGE: Function name
 def populate_database():
     try:
         db = fenologikDb(os.environ['DATABASE_URL'])
@@ -79,6 +83,6 @@ def populate_database():
         print(e)
 
 
-####################################################
-### Add function for getting taxon list from API ###
-####################################################
+#####################################################
+### Add function for updating taxon list from API ###
+#####################################################
