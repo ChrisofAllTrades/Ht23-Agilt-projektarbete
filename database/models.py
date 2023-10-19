@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Sequence, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -8,9 +8,9 @@ class Taxa(Base):
     __tablename__ = 'taxa'
 
     id = Column(Integer, primary_key=True)
-    scientificName = Column(String, nullable=False)
-    swedishName = Column(String)
-    englishName = Column(String)
+    scientificName = Column('scientificname',String, nullable=False)
+    swedishName = Column('swedishname',String)
+    englishName = Column('englishname',String)
     observation = relationship('Observations', backref='taxa')
 
     def __repr__(self):
@@ -19,12 +19,12 @@ class Taxa(Base):
 class Observations(Base):
     __tablename__ = 'observations'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, Sequence('observations_id_seq'), primary_key=True)
+    startDate = Column(DateTime)
+    endDate = Column(DateTime)
+    latitude = Column(Float)
+    longitude = Column(Float)
     taxonId = Column(Integer, ForeignKey('taxa.id'))
-    startDate = Column(Date, nullable=False)
-    endDate = Column(Date, nullable=False)
-    latitude = Column(Float, nullable=False)
-    longitude = Column(Float, nullable=False)
 
     def __repr__(self):
         return f"<Observations(id={self.id}, startDate={self.startDate}, endDate={self.endDate}, latitude={self.latitude}, longitude={self.longitude})>"
