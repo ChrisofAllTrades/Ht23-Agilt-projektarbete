@@ -1,79 +1,61 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
-import ast
+from database.db import fenologikDb
+from database.models import Observations, Taxa
+from streamlit_functions.visualisation_functions import create_layers, create_pydeck_chart #Use these to create dynamic map further down.
+import os
 
+#############################
+#  - Database connection -  #
+#############################
 
-file_path = 'data.csv'
+db = fenologikDb(os.environ['DATABASE_URL'])
 
-def safe_literal_eval(value):
-    try:
-        return ast.literal_eval(value)
-    except (SyntaxError, ValueError):
-        return None
+#########################
+#  - Filter handling -  #
+#########################
 
+#Sets a default to the session_state in cases of it being empty, such as first run. 
+# Could be changed to do the 100 most recent observations of any art, to have a starting visualisation
+results = getattr(st.session_state, 'results', []) 
 
-def get_data(file_path):
-    #Prepares the "records" category into a dataframe to be used by our visualisations:
-    df = pd.read_csv(file_path, header=None, names=['skip', 'take', 'totalCount', 'records'])
-    df['records'] = df['records'].apply(safe_literal_eval)
-    df = df.dropna(subset=['records'])
-    df = pd.concat([df.drop(['records'], axis=1), df['records'].apply(pd.Series)], axis=1)
-    
-    #Start and end date into two different columns.
-    df['start_date'] = df['event'].apply(lambda x: x['startDate'] if isinstance(x, dict) and 'startDate' in x else None)
-    df['end_date'] = df['event'].apply(lambda x: x['endDate'] if isinstance(x, dict) and 'endDate' in x else None)
+species_list = db.get_unique_species_for_dropdown_test(Taxa)
+#search_term = st.text_input("Sök art")
+#filtered_species = [s for s in species_list if search_term.lower() in s.lower()]
+selected_species = st.selectbox("Välj art", options=species_list)
 
-    # Extract 'latitude' and 'longitude' from the location column:
-    df['latitude'] = df['location'].apply(lambda x: x['decimalLatitude'] if x is not None else None)
-    df['longitude'] = df['location'].apply(lambda x: x['decimalLongitude'] if x is not None else None)
+start_date = st.date_input('Välj Startdatum')
+end_date = st.date_input('Välj Slutdatum')
 
-    #Extract taxon_id and vernacular_name from the taxon column::
-    df['taxon_id'] = df['taxon'].apply(lambda x: x['id'] if x is not None else None)
-    df['vernacular_name'] = df['taxon'].apply(lambda x: x['vernacularName'] if x is not None else None)
+if st.button('Uppdatera filter'):
+    filters = []
 
-    #Defining datatypes for our columns (to_datetime doesn't really want to work atm):
+    if selected_species:
+        taxonid = db.get_taxon_id(selected_species)
+        species_filter = Observations.taxonId == taxonid
+        filters.append(species_filter)
 
-    df['start_date'] = pd.to_datetime(df['start_date']) #Still an object without a datatype (?) and I don't know why.
-    df['end_date'] = pd.to_datetime(df['end_date']) #Still an object without a datatype (?) and I don't know why.
-    df['latitude'] = pd.to_numeric(df['latitude'].astype(float))
-    df['longitude'] = pd.to_numeric(df['longitude'].astype(float)) 
-    df['taxon_id'] = pd.to_numeric(df['taxon_id'])
-    df['vernacular_name'] = df['vernacular_name'].astype(str) #Still an object and I don't know why.
+    if start_date:
+        start_date_filter = Observations.startDate >= start_date
+        filters.append(start_date_filter)
 
-    # Drop unnecessary columns
-    df = df.drop(['skip', 'take', 'totalCount', 'event', 'location', 'taxon'], axis=1)
-    return df
+    if end_date:
+        end_date_filter = Observations.endDate <= end_date
+        filters.append(end_date_filter)
 
+    # Uses filters to query the database and create a dataframe to be used in visualisations. Saves in a session_state
+    st.session_state.results = db.observations_in_df(Observations, filters=filters)
 
-df = get_data(file_path)
+###########################################
+#  - Initializations of visualizations -  #
+###########################################
 
+zoom_level = st.slider('Välj Zoom Nivå', min_value=1, max_value=20, value=10) #Gotta play with these values a bit to get it right.
 
-coordinates_df = df[['latitude','longitude']]
+if hasattr(st.session_state, 'results') and not st.session_state.results.empty:
+    layers = create_layers(st.session_state.results, opacity=0.2, zoom_level=zoom_level)
+else:
+    layers = None
 
-heatmap_layer = pdk.Layer(
-    'HeatmapLayer',
-    data=coordinates_df,
-    get_position=['longitude', 'latitude'],
-    threshold=0.4,
-)
-
-st.pydeck_chart(pdk.Deck(
-    map_style=None,
-    initial_view_state=pdk.ViewState(
-        latitude=65,
-        longitude=17,
-        zoom=3.5,
-        pitch=0,
-        ),
-    layers=[heatmap_layer] 
-))
-
-st.write("Ovan visas en heatmap på dem 100 första observationerna av nötkråka i år.")
-
-st.dataframe(df)
-
-st.dataframe(coordinates_df)
-st.dataframe(df.dtypes)
-
-st.button("Rerun")
+st.pydeck_chart(create_pydeck_chart(layers))

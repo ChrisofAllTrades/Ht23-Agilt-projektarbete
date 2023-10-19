@@ -3,10 +3,9 @@ import os
 import geopandas as gpd
 import pandas as pd
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import load_only, sessionmaker
 
-from database.models import Base
-import os
+from database.models import Base, Observations, Taxa
 
 # To do: Finish methods for assigning gridId to observations
 # To do: Add method for processing entire dataset in chunks
@@ -26,12 +25,17 @@ class FenologikDb:
     def get_session(self):
         return self.Session()
 
-    # def query(self, model):
-    #     session = self.get_session()
-    #     result = session.query(model).all()
-    #     session.close()
-    #     return result
-    
+    def query(self, model, filters=None):
+        session = self.get_session()
+        query = session.query(model)
+
+        if filters:
+            query = query.filter(*filters)
+
+        result = query.all()
+        session.close()
+        return result
+
     def setup(self):
         Base.metadata.create_all(self.engine)
    
@@ -144,6 +148,16 @@ class FenologikDb:
 
         session.close()
 
+    def table_id_sequence(self):
+        engine = self.engine
+
+        with engine.connect() as conn:
+            conn.execute(text("""
+                ALTER TABLE observations 
+                ALTER COLUMN id 
+                SET DEFAULT nextval('observations_id_seq');
+            """))
+
 ################################
 ### Add query functions here ###
 ################################
@@ -171,3 +185,60 @@ class FenologikDb:
         #         link = urn_to_url_mapping.get('urn:Isid:artportalen.se:Sighting:') + observations.id
         #     elif 'urn:Isid:' == 'inaturalist.org:observation:':
         #         link = urn_to_url_mapping.get('urn:Isid:inaturalist.org:observation:') + observations.id
+    
+    def observations_in_df(self, model, filters):
+        observations = self.query(model, filters=filters)
+
+        data = []
+        for obs in observations:
+            data.append({
+                "longitude": obs.longitude,
+                "latitude": obs.latitude,
+            })
+
+        df = pd.DataFrame(data)
+        return df    
+
+    def get_unique_species_for_dropdown(self, model):
+        session = self.get_session()
+        try:
+            query = session.query(model).distinct(model.swedishName)
+            result = [row.swedishName for row in query.all()]
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            result = None
+        finally:
+            session.close()
+        return result
+    
+    def get_unique_species_for_dropdown_test(self, model):
+        try:
+            session = self.get_session()
+            session.begin()
+            query = session.query(model).distinct(model.swedishName)
+            results = query.all()
+
+            result = [row.swedishName for row in results]
+            session.commit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            print(f"Error type: {type(e)}")
+            session.rollback()
+            result = None
+        finally:
+            session.close()
+        return result
+
+    def get_taxon_id(self, swedish_name):
+        session = self.get_session()
+        result = session.query(Observations, Taxa).\
+                join(Taxa, Observations.taxonId == Taxa.id).\
+                filter(Taxa.swedishName == swedish_name).\
+                first()
+    
+        session.close()
+    
+        if result:
+            return result.Taxa.id  # Returnerar taxonid från Taxa-tabellen
+        else:
+            return None
