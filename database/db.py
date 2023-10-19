@@ -2,9 +2,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from database.models import Base
 
-# Test-imports
-import os
-
+# To do: Clean up class to separate database functions from query functions
 
 ##########################################
 ### Database class and query functions ###

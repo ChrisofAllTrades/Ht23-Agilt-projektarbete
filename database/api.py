@@ -3,6 +3,11 @@ import pandas as pd
 from database.db import fenologikDb
 import os
 
+# To do: Add function for updating taxon list from API (what interval?)
+# To do Add function for updating observations from API (what interval?)
+#     - It seems like some days include more than 25 000 observations (maximum allowed by obs_export_download function),
+#       maybe use TimeRangeDto[Morning , Forenoon , Afternoon , Evening , Night]? Uses more up-to-date data and removes risk of overlapping requests 
+
 ##############################################################
 ### Functions for collecting observation data from SOS API ###
 ##############################################################
@@ -83,6 +88,6 @@ def populate_database():
         print(e)
 
 
-#####################################################
-### Add function for updating taxon list from API ###
-#####################################################
+##################################################
+### Functions for updating taxon list from API ###
+##################################################
