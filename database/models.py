@@ -10,9 +10,9 @@ class Taxa(Base):
     __tablename__ = 'taxa'
 
     id = Column(Integer, primary_key=True)
-    scientificName = Column(String, nullable=False)
-    swedishName = Column(String)
-    englishName = Column(String)
+    scientificName = Column('scientificname',String, nullable=False)
+    swedishName = Column('swedishname',String)
+    englishName = Column('englishname',String)
     observation = relationship('Observations', backref='taxa')
     # taxonCategory = Column()
     # FIX: Add taxon hierarchy id
