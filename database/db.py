@@ -45,3 +45,19 @@ class fenologikDb:
 
     def post_observations(observations):
         pass
+
+    # Mock code for retrieving the source url of an observation (e.g. Artportalen, iNaturalist, etc.)
+    # Depends on how urn info is stored in the database
+    def external_obs_link():
+        pass
+        # # Unsure if it's better to define the mapping here or as a class variable
+        # urn_to_url_mapping = {
+        #     'urn:Isid:artportalen.se:Sighting:': 'https://artportalen.se/Sighting/',
+        #     'urn:Isid:inaturalist.org:observation:': 'https://www.inaturalist.org/observations/',
+        # }    
+
+        # for 'urn:Isid:' in column(observations.id):
+        #     if 'urn:Isid:' == 'artportalen.se:Sighting:':
+        #         link = urn_to_url_mapping.get('urn:Isid:artportalen.se:Sighting:') + observations.id
+        #     elif 'urn:Isid:' == 'inaturalist.org:observation:':
+        #         link = urn_to_url_mapping.get('urn:Isid:inaturalist.org:observation:') + observations.id
