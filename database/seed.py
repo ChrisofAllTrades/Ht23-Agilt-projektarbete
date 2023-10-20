@@ -9,10 +9,10 @@ import os
 
 # Change to DwC-A or keep CSV format?
 #     I don't see the need for it right now
-# To do: Rebuild function for querying API for taxa
-# To do: Clean up existing functions
 # To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
 #   - Automatic iteration over entire dataset (without overlapping)
+# To do: Rebuild function for querying API for taxa
+# To do: Clean up existing functions
 
 class seed_db:
     # Header for API calls
@@ -24,9 +24,20 @@ class seed_db:
      
     def __init__():
         pass
+    
+    # SOS API query loop for collecting entire observations dataset
+    def obs_query_loop():
+        url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
+               '?outputFieldSet=Minimum&'
+               'validateSearchFilter=false&'
+               'propertyLabelType=PropertyName&'
+               'sensitiveObservations=false&'
+               'sendMailFromZendTo=true&'
+               'cultureCode=sv-SE')
 
     # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
-    # 25 000 observations max per call
+    # 25 000 observations max per call, throws error 400 if exceeded
+    # CHANGE: Move to api.py
     def obs_export_download(self, csv_save_path):
         try:
             url = 'https://api.artdatabanken.se/species-observation-system/v1/Exports/Download/Csv?outputFieldSet=Minimum&validateSearchFilter=true&propertyLabelType=PropertyPath&cultureCode=sv-SE&gzip=true&sensitiveObservations=false'
