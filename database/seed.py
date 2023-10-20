@@ -5,12 +5,16 @@ import zipfile
 import io
 from sqlalchemy import create_engine # MetaData, Table, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
+from dateutil.relativedelta import relativedelta
+from datetime import datetime
 import os
 
 # Change to DwC-A or keep CSV format?
 #     I don't see the need for it right now
 # To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
 #   - Automatic iteration over entire dataset (without overlapping)
+#   - Is it possible to query for amount of observations in a given time period?
+# To do: Observations need timestamp. Include in date column or add new column?
 # To do: Rebuild function for querying API for taxa
 # To do: Clean up existing functions
 
@@ -26,6 +30,7 @@ class seed_db:
         pass
     
     # SOS API query loop for collecting entire observations dataset
+    # 2 000 000 observations max per call.
     def obs_query_loop():
         url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
                '?outputFieldSet=Minimum&'
@@ -34,6 +39,51 @@ class seed_db:
                'sensitiveObservations=false&'
                'sendMailFromZendTo=true&'
                'cultureCode=sv-SE')
+        
+        startDate = datetime(2023, 10, 01)
+        endDate = datetime(2023, 10, 31)
+        
+        while startDate.year >= 1600:
+            if startDate.year >= 2010:
+                startDate = startDate - relativedelta(months=1)
+                endDate = endDate - relativedelta(months=1)
+            elif startDate.year >= 2000:
+                startDate = startDate - relativedelta(months=3)
+                endDate = endDate - relativedelta(months=3)
+            elif startDate.year >= 1980:
+                startDate = startDate - relativedelta(years=1)
+                endDate = endDate - relativedelta(years=1)
+            elif startDate.year >= 1900:
+                startDate = startDate - relativedelta(years=5)
+                endDate = endDate - relativedelta(years=5)
+
+            startDateStr = startDate.strftime('%Y-%m-%d')
+            endDateStr = endDate.strftime('%Y-%m-%d')
+            
+        return startDateStr, endDateStr
+
+        # Request body
+        body = {
+            "Output": {
+                    "Fields": [
+                        "Occurrence.OccurrenceId",
+                        "Taxon.Id",
+                        "Event.StartDate",
+                        "Event.EndDate",
+                        "Location.DecimalLatitude",
+                        "Location.DecimalLongitude"
+                    ]
+                },
+                "date": {
+                    "startDate": startDateStr,
+                    "endDate": endDateStr,
+                    "dateFilterType": "OverlappingStartDateAndEndDate"
+                },
+                "taxa": {
+                    "ids": [4000104],
+                    "includeUnderlyingTaxa": True
+                }
+            }
 
     # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
     # 25 000 observations max per call, throws error 400 if exceeded
