@@ -14,6 +14,7 @@ class Seed_Db:
         pass
     
     # SOS API query loop for collecting entire observations dataset
+    # 2 000 000 observations max per call.
     def obs_query_loop():
         url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
                '?outputFieldSet=Minimum&'
@@ -22,6 +23,51 @@ class Seed_Db:
                'sensitiveObservations=false&'
                'sendMailFromZendTo=true&'
                'cultureCode=sv-SE')
+        
+        startDate = datetime(2023, 10, 01)
+        endDate = datetime(2023, 10, 31)
+        
+        while startDate.year >= 1600:
+            if startDate.year >= 2010:
+                startDate = startDate - relativedelta(months=1)
+                endDate = endDate - relativedelta(months=1)
+            elif startDate.year >= 2000:
+                startDate = startDate - relativedelta(months=3)
+                endDate = endDate - relativedelta(months=3)
+            elif startDate.year >= 1980:
+                startDate = startDate - relativedelta(years=1)
+                endDate = endDate - relativedelta(years=1)
+            elif startDate.year >= 1900:
+                startDate = startDate - relativedelta(years=5)
+                endDate = endDate - relativedelta(years=5)
+
+            startDateStr = startDate.strftime('%Y-%m-%d')
+            endDateStr = endDate.strftime('%Y-%m-%d')
+            
+        return startDateStr, endDateStr
+
+        # Request body
+        body = {
+            "Output": {
+                    "Fields": [
+                        "Occurrence.OccurrenceId",
+                        "Taxon.Id",
+                        "Event.StartDate",
+                        "Event.EndDate",
+                        "Location.DecimalLatitude",
+                        "Location.DecimalLongitude"
+                    ]
+                },
+                "date": {
+                    "startDate": startDateStr,
+                    "endDate": endDateStr,
+                    "dateFilterType": "OverlappingStartDateAndEndDate"
+                },
+                "taxa": {
+                    "ids": [4000104],
+                    "includeUnderlyingTaxa": True
+                }
+            }
 
 
 
