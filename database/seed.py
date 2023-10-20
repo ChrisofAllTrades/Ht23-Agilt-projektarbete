@@ -12,6 +12,16 @@ from database.api import API
 class Seed_Db:
     def __init__():
         pass
+    
+    # SOS API query loop for collecting entire observations dataset
+    def obs_query_loop():
+        url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
+               '?outputFieldSet=Minimum&'
+               'validateSearchFilter=false&'
+               'propertyLabelType=PropertyName&'
+               'sensitiveObservations=false&'
+               'sendMailFromZendTo=true&'
+               'cultureCode=sv-SE')
 
 
 
