@@ -3,47 +3,72 @@ import json
 import urllib.request
 import zipfile
 import io
-from sqlalchemy import create_engine # MetaData, Table, Column, Integer, String
-from sqlalchemy.orm import sessionmaker
+import os
+# from sqlalchemy import create_engine # MetaData, Table, Column, Integer, String
+# from sqlalchemy.orm import sessionmaker
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-import os
+from database.api import API
 
 # Change to DwC-A or keep CSV format?
 #     I don't see the need for it right now
 # To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
 #   - Automatic iteration over entire dataset (without overlapping)
 #   - Is it possible to query for amount of observations in a given time period?
+#   - Adjust time jumps in while loop
 # To do: Observations need timestamp. Include in date column or add new column?
 # To do: Rebuild function for querying API for taxa
 # To do: Clean up existing functions
 
-class seed_db:
-    # Header for API calls
-    hdr = {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-        }
-     
+class seed_Db:
+
     def __init__():
         pass
-    
+
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
+    # FIX: Filter in obs_count() not working and while loop not updating startDate and endDate in obs_count()
     def obs_query_loop():
         url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
-               '?outputFieldSet=Minimum&'
-               'validateSearchFilter=false&'
-               'propertyLabelType=PropertyName&'
-               'sensitiveObservations=false&'
-               'sendMailFromZendTo=true&'
-               'cultureCode=sv-SE')
+               '?outputFieldSet=Minimum'
+               '&validateSearchFilter=true'
+               # '&propertyLabelType=PropertyPath'
+               '&sensitiveObservations=false'
+               '&sendMailFromZendTo=true'
+               '&cultureCode=sv-SE')
         
-        startDate = datetime(2023, 10, 01)
-        endDate = datetime(2023, 10, 31)
+        startDate = API.startDate
+        endDate = API.endDate
         
-        while startDate.year >= 1600:
+        startDateStr = API.startDateStr
+        endDateStr = API.endDateStr
+
+        # Request body
+        body = {
+            "output": {
+                "fields": [
+                    "Occurrence.OccurrenceId",
+                    "Taxon.Id",
+                    "Event.StartDate",
+                    "Event.EndDate",
+                    "location.Sweref99TmX",
+                    "location.Sweref99TmY"
+                ]
+            },
+            "date": {
+                "startDate": startDateStr,
+                "endDate": endDateStr,
+                "dateFilterType": "OverlappingStartDateAndEndDate"
+            },
+            "taxon": {
+                "includeUnderlyingTaxa": True,
+                "ids": [4000104]
+            }
+        }
+        
+        API.obs_count(body)
+
+        while startDate.year >= 1600 & API.obs_count(body) < 2000000:
             if startDate.year >= 2010:
                 startDate = startDate - relativedelta(months=1)
                 endDate = endDate - relativedelta(months=1)
@@ -57,21 +82,21 @@ class seed_db:
                 startDate = startDate - relativedelta(years=5)
                 endDate = endDate - relativedelta(years=5)
 
-            startDateStr = startDate.strftime('%Y-%m-%d')
-            endDateStr = endDate.strftime('%Y-%m-%d')
+            startDateStr = startDate.strftime("%Y-%m-%d")
+            endDateStr = endDate.strftime("%Y-%m-%d")
             
-        return startDateStr, endDateStr
+            # return startDateStr, endDateStr
 
-        # Request body
-        body = {
-            "Output": {
-                    "Fields": [
+            # Request body
+            body = {
+                "output": {
+                    "fields": [
                         "Occurrence.OccurrenceId",
                         "Taxon.Id",
                         "Event.StartDate",
                         "Event.EndDate",
-                        "Location.DecimalLatitude",
-                        "Location.DecimalLongitude"
+                        "location.Sweref99TmX",
+                        "location.Sweref99TmY"
                     ]
                 },
                 "date": {
@@ -79,59 +104,69 @@ class seed_db:
                     "endDate": endDateStr,
                     "dateFilterType": "OverlappingStartDateAndEndDate"
                 },
-                "taxa": {
-                    "ids": [4000104],
-                    "includeUnderlyingTaxa": True
+                "taxon": {
+                    "includeUnderlyingTaxa": True,
+                    "ids": [4000104]
                 }
             }
+
+            API.obs_count(body)
+
+            # req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+            # req.get_method = lambda: "POST"
+
+            # with urllib.request.urlopen(req) as response:
+            #     data = response.read()
+            #     status_message = data.decode("utf-8")
+            #     print(status_message)
 
     # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
     # 25 000 observations max per call, throws error 400 if exceeded
     # CHANGE: Move to api.py
-    def obs_export_download(self, csv_save_path):
-        try:
-            url = 'https://api.artdatabanken.se/species-observation-system/v1/Exports/Download/Csv?outputFieldSet=Minimum&validateSearchFilter=true&propertyLabelType=PropertyPath&cultureCode=sv-SE&gzip=true&sensitiveObservations=false'
+    # def obs_export_download(self, csv_save_path):
+    #     try:
+    #         url = 'https://api.artdatabanken.se/species-observation-system/v1/Exports/Download/Csv?outputFieldSet=Minimum&validateSearchFilter=true&propertyLabelType=PropertyPath&cultureCode=sv-SE&gzip=true&sensitiveObservations=false'
 
-            # Request body
-            body = {
-                "Output": {
-                    "Fields": [
-                        "Occurrence.OccurrenceId",
-                        "Taxon.Id",
-                        "Event.StartDate",
-                        "Event.EndDate",
-                        "Location.DecimalLatitude",
-                        "Location.DecimalLongitude"
-                    ]
-                },
-                "date": {
-                    "startDate": "2023-01-01",
-                    "endDate": "2023-01-31",
-                    "dateFilterType": "OverlappingStartDateAndEndDate"
-                },
-                "taxa": {
-                    "ids": [4000104],
-                    "includeUnderlyingTaxa": True
-                }
-            }
-            # save_path = '/testing/medium_observations.csv'
-            req = urllib.request.Request(url, headers=seed_db.hdr, data=bytes(json.dumps(body).encode("utf-8")))
-            req.get_method = lambda: 'POST'
+    #         # Request body
+    #         body = {
+    #             "Output": {
+    #                 "Fields": [
+    #                     "Occurrence.OccurrenceId",
+    #                     "Taxon.Id",
+    #                     "Event.StartDate",
+    #                     "Event.EndDate",
+    #                     "location.Sweref99TmX",
+    #                     "location.Sweref99TmY"
+    #                 ]
+    #             },
+    #             "date": {
+    #                 "startDate": "2023-01-01",
+    #                 "endDate": "2023-01-31",
+    #                 "dateFilterType": "OverlappingStartDateAndEndDate"
+    #             },
+    #             "taxa": {
+    #                 "ids": [4000104],
+    #                 "includeUnderlyingTaxa": True
+    #             }
+    #         }
+    #         # save_path = '/testing/medium_observations.csv'
+    #         req = urllib.request.Request(url, headers=seed_db.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+    #         req.get_method = lambda: 'POST'
 
-            with urllib.request.urlopen(req) as response:
-                data = response.read()
+    #         with urllib.request.urlopen(req) as response:
+    #             data = response.read()
 
-            with zipfile.ZipFile(io.BytesIO(data)) as z:
-                z.extractall(csv_save_path)
-            # data = json.dumps(data)
-            # req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
-            # req.get_method = lambda: 'POST'
+    #         with zipfile.ZipFile(io.BytesIO(data)) as z:
+    #             z.extractall(csv_save_path)
+    #         # data = json.dumps(data)
+    #         # req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
+    #         # req.get_method = lambda: 'POST'
 
-            # # Send HTTP request and load response into pandas dataframe
-            # response = urllib.request.urlopen(req)
-            # return response
-        except Exception as e:
-            print(e)
+    #         # # Send HTTP request and load response into pandas dataframe
+    #         # response = urllib.request.urlopen(req)
+    #         # return response
+    #     except Exception as e:
+    #         print(e)
 
     # def transform_observations():
     #     try:
