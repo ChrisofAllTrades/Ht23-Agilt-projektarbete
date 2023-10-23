@@ -21,7 +21,7 @@ class API:
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-            'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IkI5QTMxQ0UxMTQzMTcwNENDQjJGOEYzODBGQURDQjhCNzZCMjU3MjEiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJ1YU1jNFJReGNFekxMNDg0RDYzTGkzYXlWeUUifQ.eyJuYmYiOjE2OTgwNTQ1MzIsImV4cCI6MTY5ODE0MDkzMiwiaXNzIjoiaHR0cHM6Ly9pZHMuYXJ0ZGF0YWJhbmtlbi5zZSIsImF1ZCI6WyJodHRwczovL2lkcy5hcnRkYXRhYmFua2VuLnNlL3Jlc291cmNlcyIsIlNPUy5PYnNlcnZhdGlvbnMiXSwiY2xpZW50X2lkIjoiQXp1cmVBUElNYW5hZ2VtZW50Iiwic3ViIjoiMTE2ODQzIiwiYXV0aF90aW1lIjoxNjk4MDU0NTMyLCJpZHAiOiJsb2NhbCIsInJpZCI6IjIiLCJuYW1lIjoiQ2hyaXN0b2ZmZXIgT2xzc29uIiwiZW1haWwiOiJvbHNzb24uY2hyaXN0b2ZmZXJAcG0ubWUiLCJybmFtZSI6IlByaXZhdCIsInNjb3BlIjpbIm9wZW5pZCIsIlNPUy5PYnNlcnZhdGlvbnMuUHJvdGVjdGVkIl0sImFtciI6WyJwd2QiXX0.PUz6f1DkxoSxLOX6j9Sv3eCGJrufTCXBY78H8RSKLlQE-dwwE-QZkgA6OwqnkLVrLoLqsqhH6hXr16EgHYcGEPmuBHkGOgA3_QBs4EvH6rrPSQDvX_iU0gAU3AMbgBI4s6WVaqFhAkoxz8c6KMBsUPIS80LGSvFNEZa5YEGSiSMVOr9mxzqFk-2lldASdnNlOS93kHkt-3gjHBLsYpsUk199wiwGLLlGheMnjvHT4AoBs2YXAsikyxgt6Ye5qNh5LaUu0Au8EDeyCQxx02a7_mgFS3tlc5HuB7KEPpVYC09YIhQ0po5QSU_gJ9WlCXilp7MpOZMpQ667x-3nmCBJJQ'
+            'Authorization': ''
         }
 
     # Doday's date?
