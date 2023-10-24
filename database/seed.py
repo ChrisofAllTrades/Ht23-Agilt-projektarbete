@@ -15,7 +15,8 @@ from database.api import API
 # To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
 #   - Automatic iteration over entire dataset (without overlapping)
 #   - Is it possible to query for amount of observations in a given time period?
-#   - Adjust time jumps in while loop
+#   - CHANGE: If loop sends one request per statement
+#   - FIX: Doesn't break when called
 # To do: Observations need timestamp. Include in date column or add new column?
 # To do: Rebuild function for querying API for taxa
 # To do: Clean up existing functions
@@ -29,64 +30,27 @@ class seed_Db:
     # 2 000 000 observations max per call.
     # FIX: Filter in obs_count() not working and while loop not updating startDate and endDate in obs_count()
     def obs_query_loop():
-        url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
-               '?outputFieldSet=Minimum'
-               '&validateSearchFilter=true'
-               # '&propertyLabelType=PropertyPath'
-               '&sensitiveObservations=false'
-               '&sendMailFromZendTo=true'
-               '&cultureCode=sv-SE')
+        url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
+               # "?descripion=" + endDate.strftime("%Y%m%d") + "-" + startDate.strftime("%Y%m%d")
+               "outputFieldSet=Minimum"
+               "&validateSearchFilter=true"
+               # "&propertyLabelType=PropertyPath"
+               "&sensitiveObservations=false"
+               "&sendMailFromZendTo=true"
+               "&cultureCode=sv-SE")
         
-        startDate = API.startDate
-        endDate = API.endDate
+        endDate = datetime.today().date()
+        startDate = endDate - relativedelta(months=6)
+
+        # endDate = datetime(1950, 1, 1)
+        # startDate = datetime(1600, 1, 1)
+
+        first_iteration = True
+        export_orders_count = 0
+        request_status_dict = {}
         
-        startDateStr = API.startDateStr
-        endDateStr = API.endDateStr
-
-        # Request body
-        body = {
-            "output": {
-                "fields": [
-                    "Occurrence.OccurrenceId",
-                    "Taxon.Id",
-                    "Event.StartDate",
-                    "Event.EndDate",
-                    "location.Sweref99TmX",
-                    "location.Sweref99TmY"
-                ]
-            },
-            "date": {
-                "startDate": startDateStr,
-                "endDate": endDateStr,
-                "dateFilterType": "OverlappingStartDateAndEndDate"
-            },
-            "taxon": {
-                "includeUnderlyingTaxa": True,
-                "ids": [4000104]
-            }
-        }
+        while startDate.year >= 1600:
         
-        API.obs_count(body)
-
-        while startDate.year >= 1600 & API.obs_count(body) < 2000000:
-            if startDate.year >= 2010:
-                startDate = startDate - relativedelta(months=1)
-                endDate = endDate - relativedelta(months=1)
-            elif startDate.year >= 2000:
-                startDate = startDate - relativedelta(months=3)
-                endDate = endDate - relativedelta(months=3)
-            elif startDate.year >= 1980:
-                startDate = startDate - relativedelta(years=1)
-                endDate = endDate - relativedelta(years=1)
-            elif startDate.year >= 1900:
-                startDate = startDate - relativedelta(years=5)
-                endDate = endDate - relativedelta(years=5)
-
-            startDateStr = startDate.strftime("%Y-%m-%d")
-            endDateStr = endDate.strftime("%Y-%m-%d")
-            
-            # return startDateStr, endDateStr
-
             # Request body
             body = {
                 "output": {
@@ -100,8 +64,8 @@ class seed_Db:
                     ]
                 },
                 "date": {
-                    "startDate": startDateStr,
-                    "endDate": endDateStr,
+                    "startDate": startDate.strftime("%Y-%m-%d"),
+                    "endDate": endDate.strftime("%Y-%m-%d"),
                     "dateFilterType": "OverlappingStartDateAndEndDate"
                 },
                 "taxon": {
@@ -110,15 +74,42 @@ class seed_Db:
                 }
             }
 
-            API.obs_count(body)
+            if API.obs_count(body) == 0:
+                print("Observation count is 0. Stopping.")
+                break
+            elif API.obs_count(body) < 2000000:
+                endDate = startDate - relativedelta(days=1)
+                export_orders_count += 1
+                # if first_iteration:
+                #     input("Check received data before continuing")
+                #     startDate = endDate - relativedelta(months=6)
+                #     first_iteration = False
+                if startDate.year >= 2004:
+                    startDate = endDate - relativedelta(months=6)
+                elif startDate.year >= 2000:
+                    startDate = endDate - relativedelta(years=2)
+                elif startDate.year >= 1990:
+                    startDate = endDate - relativedelta(years=3)
+                elif startDate.year >= 1980:
+                    startDate = endDate - relativedelta(years=8)
+                # elif startDate.year >= 1950:
+                #     startDate = endDate - relativedelta(years=10)
+                else: 
+                    startDate = datetime(1600, 1, 1)
+                
+                # req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+                # req.get_method = lambda: "POST"
 
-            # req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
-            # req.get_method = lambda: "POST"
+                # with urllib.request.urlopen(req) as response:
+                #     data = response.read()
+                #     status_message = data.decode("utf-8")
+                #     request_status_dict[startDate.strftime("%Y%m%d") + "-" + endDate.strftime("%Y%m%d")] = status_message
+            elif API.obs_count(body) > 2000000:
+                print('\033[1;31mToo many observations, narrowing search\033[0m')
+                startDate = startDate + relativedelta(months=1)
+            
+            print("Export orders made: " + str(export_orders_count) + ". Now filtering between", startDate.strftime("%Y-%m-%d"), "and", endDate.strftime("%Y-%m-%d"))
 
-            # with urllib.request.urlopen(req) as response:
-            #     data = response.read()
-            #     status_message = data.decode("utf-8")
-            #     print(status_message)
 
     # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
     # 25 000 observations max per call, throws error 400 if exceeded
