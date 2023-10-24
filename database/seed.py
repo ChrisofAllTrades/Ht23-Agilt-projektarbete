@@ -17,64 +17,27 @@ class Seed_Db:
     # 2 000 000 observations max per call.
     # FIX: Filter in obs_count() not working and while loop not updating startDate and endDate in obs_count()
     def obs_query_loop():
-        url = ('https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv'
-               '?outputFieldSet=Minimum'
-               '&validateSearchFilter=true'
-               # '&propertyLabelType=PropertyPath'
-               '&sensitiveObservations=false'
-               '&sendMailFromZendTo=true'
-               '&cultureCode=sv-SE')
+        url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
+               # "?descripion=" + endDate.strftime("%Y%m%d") + "-" + startDate.strftime("%Y%m%d")
+               "outputFieldSet=Minimum"
+               "&validateSearchFilter=true"
+               # "&propertyLabelType=PropertyPath"
+               "&sensitiveObservations=false"
+               "&sendMailFromZendTo=true"
+               "&cultureCode=sv-SE")
         
-        startDate = API.startDate
-        endDate = API.endDate
+        endDate = datetime.today().date()
+        startDate = endDate - relativedelta(months=6)
+
+        # endDate = datetime(1950, 1, 1)
+        # startDate = datetime(1600, 1, 1)
+
+        first_iteration = True
+        export_orders_count = 0
+        request_status_dict = {}
         
-        startDateStr = API.startDateStr
-        endDateStr = API.endDateStr
-
-        # Request body
-        body = {
-            "output": {
-                "fields": [
-                    "Occurrence.OccurrenceId",
-                    "Taxon.Id",
-                    "Event.StartDate",
-                    "Event.EndDate",
-                    "location.Sweref99TmX",
-                    "location.Sweref99TmY"
-                ]
-            },
-            "date": {
-                "startDate": startDateStr,
-                "endDate": endDateStr,
-                "dateFilterType": "OverlappingStartDateAndEndDate"
-            },
-            "taxon": {
-                "includeUnderlyingTaxa": True,
-                "ids": [4000104]
-            }
-        }
+        while startDate.year >= 1600:
         
-        API.obs_count(body)
-
-        while startDate.year >= 1600 & API.obs_count(body) < 2000000:
-            if startDate.year >= 2010:
-                startDate = startDate - relativedelta(months=1)
-                endDate = endDate - relativedelta(months=1)
-            elif startDate.year >= 2000:
-                startDate = startDate - relativedelta(months=3)
-                endDate = endDate - relativedelta(months=3)
-            elif startDate.year >= 1980:
-                startDate = startDate - relativedelta(years=1)
-                endDate = endDate - relativedelta(years=1)
-            elif startDate.year >= 1900:
-                startDate = startDate - relativedelta(years=5)
-                endDate = endDate - relativedelta(years=5)
-
-            startDateStr = startDate.strftime("%Y-%m-%d")
-            endDateStr = endDate.strftime("%Y-%m-%d")
-            
-            # return startDateStr, endDateStr
-
             # Request body
             body = {
                 "output": {
@@ -88,8 +51,8 @@ class Seed_Db:
                     ]
                 },
                 "date": {
-                    "startDate": startDateStr,
-                    "endDate": endDateStr,
+                    "startDate": startDate.strftime("%Y-%m-%d"),
+                    "endDate": endDate.strftime("%Y-%m-%d"),
                     "dateFilterType": "OverlappingStartDateAndEndDate"
                 },
                 "taxon": {
