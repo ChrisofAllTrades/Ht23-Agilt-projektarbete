@@ -24,12 +24,11 @@ class API:
             'Authorization': ''
         }
 
-    # Doday's date?
-    startDate = datetime.today().date()
-    endDate = startDate - relativedelta(months=1)
+    endDate = datetime.today().date()
+    startDate = endDate - relativedelta(months=1)
 
-    startDateStr = startDate.strftime("%Y-%m-%d")
     endDateStr = endDate.strftime("%Y-%m-%d")
+    startDateStr = startDate.strftime("%Y-%m-%d")
 
     # Outputs the number of observations for a given search filter
     def obs_count(body):
@@ -37,7 +36,7 @@ class API:
                "?validateSearchFilter=true"
                "&sensitiveObservations=false")
         
-        body = {}
+        # body = {}
             
         req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
         req.get_method = lambda: "POST"
@@ -76,8 +75,8 @@ class API:
                     ]
                 },
                 "date": {
-                    "startDate": "2023-01-01",
-                    "endDate": "2023-12-31",
+                    "startDate": API.startDateStr,
+                    "endDate": API.endDateStr,
                     "dateFilterType": "OverlappingStartDateAndEndDate",
                 },
                 "taxon": {
