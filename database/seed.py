@@ -13,10 +13,6 @@ from database.api import API
 # Change to DwC-A or keep CSV format?
 #     I don't see the need for it right now
 # To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
-#   - Automatic iteration over entire dataset (without overlapping)
-#   - Is it possible to query for amount of observations in a given time period?
-#   - CHANGE: If loop sends one request per statement
-#   - FIX: Doesn't break when called
 # To do: Observations need timestamp. Include in date column or add new column?
 # To do: Rebuild function for querying API for taxa
 # To do: Clean up existing functions
@@ -28,13 +24,12 @@ class seed_Db:
 
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
-    # FIX: Filter in obs_count() not working and while loop not updating startDate and endDate in obs_count()
     def obs_query_loop():
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
-               # "?descripion=" + endDate.strftime("%Y%m%d") + "-" + startDate.strftime("%Y%m%d")
+               f"?descripion= {endDate.strftime('%Y%m%d')}-{startDate.strftime('%Y%m%d')}"
                "outputFieldSet=Minimum"
                "&validateSearchFilter=true"
-               # "&propertyLabelType=PropertyPath"
+               "&propertyLabelType=PropertyPath"
                "&sensitiveObservations=false"
                "&sendMailFromZendTo=true"
                "&cultureCode=sv-SE")
@@ -43,14 +38,14 @@ class seed_Db:
         startDate = endDate - relativedelta(months=6)
 
         # endDate = datetime(1950, 1, 1)
-        # startDate = datetime(1600, 1, 1)
+        # startDate = datetime(1985, 1, 1)
 
+        obs_count = 1
         first_iteration = True
         export_orders_count = 0
         request_status_dict = {}
         
-        while startDate.year >= 1600:
-        
+        while obs_count > 0:
             # Request body
             body = {
                 "output": {
@@ -74,16 +69,18 @@ class seed_Db:
                 }
             }
 
-            if API.obs_count(body) == 0:
+            obs_count = API.obs_count(body)
+
+            if obs_count == 0:
                 print("Observation count is 0. Stopping.")
                 break
-            elif API.obs_count(body) < 2000000:
+            elif obs_count < 2000000:
                 endDate = startDate - relativedelta(days=1)
                 export_orders_count += 1
-                # if first_iteration:
-                #     input("Check received data before continuing")
-                #     startDate = endDate - relativedelta(months=6)
-                #     first_iteration = False
+                if first_iteration:
+                    input("Check received data before continuing")
+                    startDate = endDate - relativedelta(months=6)
+                    first_iteration = False
                 if startDate.year >= 2004:
                     startDate = endDate - relativedelta(months=6)
                 elif startDate.year >= 2000:
@@ -95,7 +92,7 @@ class seed_Db:
                 # elif startDate.year >= 1950:
                 #     startDate = endDate - relativedelta(years=10)
                 else: 
-                    startDate = datetime(1600, 1, 1)
+                    startDate = endDate - relativedelta(years=400)
                 
                 # req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
                 # req.get_method = lambda: "POST"
@@ -104,12 +101,11 @@ class seed_Db:
                 #     data = response.read()
                 #     status_message = data.decode("utf-8")
                 #     request_status_dict[startDate.strftime("%Y%m%d") + "-" + endDate.strftime("%Y%m%d")] = status_message
-            elif API.obs_count(body) > 2000000:
+            elif obs_count > 2000000:
                 print('\033[1;31mToo many observations, narrowing search\033[0m')
                 startDate = startDate + relativedelta(months=1)
             
-            print("Export orders made: " + str(export_orders_count) + ". Now filtering between", startDate.strftime("%Y-%m-%d"), "and", endDate.strftime("%Y-%m-%d"))
-
+            print("Export orders made: " + str(export_orders_count) + ". Now filtering between", startDate.strftime("%Y-%m-%d"), "and", endDate.strftime("%Y-%m-%d"))  
 
     # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
     # 25 000 observations max per call, throws error 400 if exceeded

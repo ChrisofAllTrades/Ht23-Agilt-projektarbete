@@ -1,4 +1,4 @@
-import urllib.request, json
+import urllib.request, urllib.parse, json
 import pandas as pd
 from database.db import fenologikDb
 import os
@@ -16,12 +16,56 @@ from dateutil.relativedelta import relativedelta
 ##############################################################
 
 class API:
+    # Authorization token request
+    # NOT BEST PRACTICE: Only using due to lack of other options
+    # DOES NOT WORK: Need client_id and client_secret from ArtDatabanken
+    # @staticmethod
+    # def auth_token():
+    #     # The URL of the token endpoint
+    #     token_url = "https://ids.artdatabanken.se/connect/token"
+
+    #     # The data to send in the request
+    #     data = {
+    #         "grant_type": "password",
+    #         "username": os.getenv("ART_USERNAME"),
+    #         "password": os.getenv("ART_PASSWORD"),
+    #         "client_id": "artdatabanken",
+    #         "client_secret": os.getenv("ART_CLIENT_SECRET"),
+    #         "scope": "openid"
+    #     }
+
+    #     # Encode the data
+    #     data = urllib.parse.urlencode(data).encode()
+
+    #     # Create the request
+    #     req = urllib.request.Request(token_url, data=data)
+
+    #     try:
+                
+    #         # Send the request and get the response
+    #         with urllib.request.urlopen(req) as response:
+    #             # Read the response
+    #             response_data = response.read()
+    #     except urllib.error.HTTPError as error:
+    #         # If an HTTP error occurs (such as a 404 or 403) the error code and description are returned
+    #         print(f"HTTP error: {error.code}")
+    #         print(f"HTTP error: {error.read()}")
+        
+    #     # Parse the JSON response
+    #     token_response = json.loads(response_data)
+
+    #     # Extract the bearer token from the response
+    #     bearer_token = token_response["access_token"]
+
+    #     # Print the bearer token
+    #     return bearer_token
+
     # Header for API calls
     hdr = {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-            'Authorization': ''
+            'Authorization': os.environ['AUTH_TOKEN']
         }
 
     endDate = datetime.today().date()
