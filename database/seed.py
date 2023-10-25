@@ -16,17 +16,20 @@ class Seed_Db:
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
     def obs_query_loop():
+        endDate = datetime.today().date()
+        startDate = endDate - relativedelta(months=6)
+        endDateStr = endDate.strftime('%Y%m%d')
+        startDateStr = startDate.strftime('%Y%m%d')
+
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
-               f"?descripion= {endDate.strftime('%Y%m%d')}-{startDate.strftime('%Y%m%d')}"
-               "outputFieldSet=Minimum"
+               f"?descripion={startDateStr}-{endDateStr}"
+               "&outputFieldSet=Minimum"
                "&validateSearchFilter=true"
                "&propertyLabelType=PropertyPath"
                "&sensitiveObservations=false"
                "&sendMailFromZendTo=true"
                "&cultureCode=sv-SE")
         
-        endDate = datetime.today().date()
-        startDate = endDate - relativedelta(months=6)
 
         # endDate = datetime(1950, 1, 1)
         # startDate = datetime(1985, 1, 1)
@@ -36,6 +39,7 @@ class Seed_Db:
         export_orders_count = 0
         request_status_dict = {}
         
+        # Loop through API dataset until all observations have been collected
         while obs_count > 0:
             # Request body
             body = {
@@ -50,8 +54,8 @@ class Seed_Db:
                     ]
                 },
                 "date": {
-                    "startDate": startDate.strftime("%Y-%m-%d"),
-                    "endDate": endDate.strftime("%Y-%m-%d"),
+                    "startDate": startDateStr,
+                    "endDate": endDateStr,
                     "dateFilterType": "OverlappingStartDateAndEndDate"
                 },
                 "taxon": {
