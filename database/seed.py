@@ -17,22 +17,10 @@ class Seed_Db:
     # 2 000 000 observations max per call.
     def obs_query_loop():
         endDate = datetime.today().date()
-        startDate = endDate - relativedelta(months=6)
-        endDateStr = endDate.strftime('%Y%m%d')
-        startDateStr = startDate.strftime('%Y%m%d')
-
-        url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
-               f"?descripion={startDateStr}-{endDateStr}"
-               "&outputFieldSet=Minimum"
-               "&validateSearchFilter=true"
-               "&propertyLabelType=PropertyPath"
-               "&sensitiveObservations=false"
-               "&sendMailFromZendTo=true"
-               "&cultureCode=sv-SE")
+        startDate = endDate - relativedelta(days=1)
         
-
-        # endDate = datetime(1950, 1, 1)
-        # startDate = datetime(1985, 1, 1)
+        # endDate = datetime(2023, 10, 24)
+        # startDate = datetime(2023, 10, 14)
 
         obs_count = 1
         first_iteration = True
@@ -41,22 +29,35 @@ class Seed_Db:
         
         # Loop through API dataset until all observations have been collected
         while obs_count > 0:
+            endDateStr = endDate.strftime('%Y%m%d')
+            startDateStr = startDate.strftime('%Y%m%d')
+
+            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
+                f"?descripion={startDateStr}-{endDateStr}"
+                "&validateSearchFilter=true"
+                "&propertyLabelType=PropertyPath"
+                "&sensitiveObservations=false"
+                "&sendMailFromZendTo=true"
+                "&cultureCode=sv-SE"
+            )
+            
             # Request body
             body = {
                 "output": {
                     "fields": [
-                        "Occurrence.OccurrenceId",
-                        "Taxon.Id",
-                        "Event.StartDate",
-                        "Event.EndDate",
+                        "occurrence.occurrenceId",
+                        "taxon.id",
+                        "event.startDate",
+                        "event.endDate",
+                        "event.plainStartTime",
+                        "event.plainEndTime",
                         "location.Sweref99TmX",
                         "location.Sweref99TmY"
                     ]
                 },
                 "date": {
-                    "startDate": startDateStr,
-                    "endDate": endDateStr,
-                    "dateFilterType": "OverlappingStartDateAndEndDate"
+                    "startDate": startDate.strftime('%Y-%m-%d'),
+                    "endDate": endDate.strftime('%Y-%m-%d'),
                 },
                 "taxon": {
                     "includeUnderlyingTaxa": True,
