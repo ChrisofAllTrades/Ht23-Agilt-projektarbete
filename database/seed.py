@@ -15,13 +15,12 @@ class Seed_Db:
 
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
-    # FIX: Filter in obs_count() not working and while loop not updating startDate and endDate in obs_count()
     def obs_query_loop():
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
-               # "?descripion=" + endDate.strftime("%Y%m%d") + "-" + startDate.strftime("%Y%m%d")
+               f"?descripion= {endDate.strftime('%Y%m%d')}-{startDate.strftime('%Y%m%d')}"
                "outputFieldSet=Minimum"
                "&validateSearchFilter=true"
-               # "&propertyLabelType=PropertyPath"
+               "&propertyLabelType=PropertyPath"
                "&sensitiveObservations=false"
                "&sendMailFromZendTo=true"
                "&cultureCode=sv-SE")
@@ -30,14 +29,14 @@ class Seed_Db:
         startDate = endDate - relativedelta(months=6)
 
         # endDate = datetime(1950, 1, 1)
-        # startDate = datetime(1600, 1, 1)
+        # startDate = datetime(1985, 1, 1)
 
+        obs_count = 1
         first_iteration = True
         export_orders_count = 0
         request_status_dict = {}
         
-        while startDate.year >= 1600:
-        
+        while obs_count > 0:
             # Request body
             body = {
                 "output": {
