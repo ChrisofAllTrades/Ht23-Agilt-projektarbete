@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from database.models import Base
+import os
 
 # To do: Clean up class to separate database functions from query functions
 
@@ -34,6 +35,21 @@ class fenologikDb:
                 ALTER COLUMN id 
                 SET DEFAULT nextval('observations_id_seq');
             """))
+
+    # CHANGE: Function name
+    def populate_database():
+        db = fenologikDb(os.environ['DATABASE_URL'])
+        session = db.get_session()
+        conn = session.connection().connection
+        cur = conn.cursor()
+
+        # CHANGE: File path when populating with whole dataset
+        with open('testing/observations.csv', 'r') as f:
+            next(f) # Skip the header row.
+            cur.copy_from(f, 'observations', columns=('startDate', 'endDate', 'latitude', 'longitude', 'taxonId'), sep=',')
+            conn.commit()
+
+        session.close()
 
 ################################
 ### Add query functions here ###
