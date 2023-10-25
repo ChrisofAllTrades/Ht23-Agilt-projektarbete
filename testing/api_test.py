@@ -1,8 +1,8 @@
 from database.seed import seed_Db
+from database.api import API
 
 # observations_export('testing/medium_dataset')
-# seed_db.obs_query_loop()
-
+#API.auth_token()
 seed_Db.obs_query_loop()
 
-input("")
+# input("")
