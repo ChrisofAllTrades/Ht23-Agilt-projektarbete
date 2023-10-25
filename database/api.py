@@ -17,7 +17,7 @@ from dateutil.relativedelta import relativedelta
 
 class API:
     # Authorization token request
-    # NOT BEST PRACTICE: Only using due to lack of other options
+    # NOT BEST PRACTICE: Change to use client credentials flow instead of password flow
     # DOES NOT WORK: Need client_id and client_secret from ArtDatabanken
     # @staticmethod
     # def auth_token():
@@ -33,7 +33,6 @@ class API:
     #         "client_secret": os.getenv("ART_CLIENT_SECRET"),
     #         "scope": "openid"
     #     }
-
     #     # Encode the data
     #     data = urllib.parse.urlencode(data).encode()
 

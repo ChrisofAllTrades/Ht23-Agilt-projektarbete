@@ -25,17 +25,20 @@ class seed_Db:
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
     def obs_query_loop():
+        endDate = datetime.today().date()
+        startDate = endDate - relativedelta(months=6)
+        endDateStr = endDate.strftime('%Y%m%d')
+        startDateStr = startDate.strftime('%Y%m%d')
+
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
-               f"?descripion= {endDate.strftime('%Y%m%d')}-{startDate.strftime('%Y%m%d')}"
-               "outputFieldSet=Minimum"
+               f"?descripion={startDateStr}-{endDateStr}"
+               "&outputFieldSet=Minimum"
                "&validateSearchFilter=true"
                "&propertyLabelType=PropertyPath"
                "&sensitiveObservations=false"
                "&sendMailFromZendTo=true"
                "&cultureCode=sv-SE")
         
-        endDate = datetime.today().date()
-        startDate = endDate - relativedelta(months=6)
 
         # endDate = datetime(1950, 1, 1)
         # startDate = datetime(1985, 1, 1)
@@ -45,6 +48,7 @@ class seed_Db:
         export_orders_count = 0
         request_status_dict = {}
         
+        # Loop through API dataset until all observations have been collected
         while obs_count > 0:
             # Request body
             body = {
@@ -59,8 +63,8 @@ class seed_Db:
                     ]
                 },
                 "date": {
-                    "startDate": startDate.strftime("%Y-%m-%d"),
-                    "endDate": endDate.strftime("%Y-%m-%d"),
+                    "startDate": startDateStr,
+                    "endDate": endDateStr,
                     "dateFilterType": "OverlappingStartDateAndEndDate"
                 },
                 "taxon": {
@@ -71,16 +75,13 @@ class seed_Db:
 
             obs_count = API.obs_count(body)
 
+            # Sequence of if statements to determine next query date range
             if obs_count == 0:
                 print("Observation count is 0. Stopping.")
                 break
             elif obs_count < 2000000:
                 endDate = startDate - relativedelta(days=1)
                 export_orders_count += 1
-                if first_iteration:
-                    input("Check received data before continuing")
-                    startDate = endDate - relativedelta(months=6)
-                    first_iteration = False
                 if startDate.year >= 2004:
                     startDate = endDate - relativedelta(months=6)
                 elif startDate.year >= 2000:
@@ -89,18 +90,25 @@ class seed_Db:
                     startDate = endDate - relativedelta(years=3)
                 elif startDate.year >= 1980:
                     startDate = endDate - relativedelta(years=8)
-                # elif startDate.year >= 1950:
-                #     startDate = endDate - relativedelta(years=10)
                 else: 
                     startDate = endDate - relativedelta(years=400)
                 
-                # req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
-                # req.get_method = lambda: "POST"
+                # Request query to download observations as CSV
+                req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+                req.get_method = lambda: "POST"
 
-                # with urllib.request.urlopen(req) as response:
-                #     data = response.read()
-                #     status_message = data.decode("utf-8")
-                #     request_status_dict[startDate.strftime("%Y%m%d") + "-" + endDate.strftime("%Y%m%d")] = status_message
+                with urllib.request.urlopen(req) as response:
+                    data = response.read()
+                    status_message = data.decode("utf-8")
+                    request_status_dict[startDate.strftime("%Y%m%d") + "-" + endDate.strftime("%Y%m%d")] = status_message
+                    print(status_message)
+            
+                if first_iteration:
+                    input("Check received data before continuing")
+                    startDate = endDate - relativedelta(months=6)
+                    first_iteration = False
+
+            # If observation count exceeds 2 000 000, narrow search
             elif obs_count > 2000000:
                 print('\033[1;31mToo many observations, narrowing search\033[0m')
                 startDate = startDate + relativedelta(months=1)
