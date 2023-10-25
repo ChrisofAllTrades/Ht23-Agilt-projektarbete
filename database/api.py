@@ -1,9 +1,11 @@
 import urllib.request, urllib.parse, json
 import pandas as pd
-from database.db import fenologikDb
 import os
+import io
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+import zipfile
+from database.db import fenologikDb
 
 # To do: Add function for updating taxon list from API (what interval?)
 # To do Add function for updating observations from API (what interval?)
@@ -60,26 +62,47 @@ class API:
     #     return bearer_token
 
     # Header for API calls
-    hdr = {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-            'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-            'Authorization': os.environ['AUTH_TOKEN']
-        }
+    # Authorization token only needed when running seed_Db.obs_query_loop()
 
     endDate = datetime.today().date()
-    startDate = endDate - relativedelta(months=1)
+#    startDate = endDate - relativedelta(months=1)
+    startDate = datetime.today().date()
 
     endDateStr = endDate.strftime("%Y-%m-%d")
     startDateStr = startDate.strftime("%Y-%m-%d")
+    
+    hdr = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
+        'Authorization': os.environ['AUTH_TOKEN'] # CHANGE: Append to seed_Db.obs_query_loop() hdr instead
+    }
+
+    body = {
+        "output": {
+            "fields": [
+            "taxon.id",
+            "event.startDate",
+            "event.endDate",
+            "location.Sweref99TmX",
+            "location.Sweref99TmY"
+            ]
+        },
+        "date": {
+            "startDate": startDateStr,
+            "endDate": endDateStr
+        },
+        "taxon": {
+            "includeUnderlyingTaxa": True,
+            "ids": [4000104]
+        }
+    }
 
     # Outputs the number of observations for a given search filter
     def obs_count(body):
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Observations/Count"
                "?validateSearchFilter=true"
                "&sensitiveObservations=false")
-        
-        # body = {}
             
         req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
         req.get_method = lambda: "POST"
@@ -92,79 +115,51 @@ class API:
 
     # CHANGE: Function to update database with new observations
     def get_observations():
-        try:
-            # Change it so the parameters are passed in as arguments instead of in the url
-            # take=100&sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false
-            url = "https://api.artdatabanken.se/species-observation-system/v1/Observations/Search?skip=0&take=1000&sortOrder=Asc&validateSearchFilter=true&translationCultureCode=sv-SE&sensitiveObservations=false"
+        url = ("https://api.artdatabanken.se/species-observation-system/v1/Observations/Search"
+                "?skip=0"
+                "&take=1000"
+                "&sortOrder=Asc"
+                "&validateSearchFilter=true"
+                "&translationCultureCode=sv-SE"
+                "&sensitiveObservations=false"
+        )
 
-            # Request headers
-            hdr ={
-                'X-Api-Version': '1.5',
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
-                'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
-                # 'take': '1000'
-            }
+        req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(API.body).encode("utf-8")))
+        req.get_method = lambda: 'POST'
 
-            # Request body
-            data = {
-                "output": {
-                    "fields": [
-                        "taxon.id",
-                        "event.startDate",
-                        "event.endDate",
-                        "location.Sweref99TmX",
-                        "location.Sweref99TmY"
-                    ]
-                },
-                "date": {
-                    "startDate": API.startDateStr,
-                    "endDate": API.endDateStr,
-                    "dateFilterType": "OverlappingStartDateAndEndDate",
-                },
-                "taxon": {
-                    "includeUnderlyingTaxa": True,
-                    "ids": [4000104],
-                }
-            }
-            data = json.dumps(data)
-            # req = urllib.request.Request(url, headers=hdr, data = bytes(data.encode("utf-8")))
-            req = urllib.request.Request(url, headers=hdr)
-            req.get_method = lambda: 'POST'
+        # Send HTTP request and load response into pandas dataframe
+        response = urllib.request.urlopen(req)
+        return response
+        
+    # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
+    #25 000 observations max per call, throws error 400 if exceeded
+    def obs_export_download(csv_save_path):
+        url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Download/Csv"
+               "?validateSearchFilter=true"
+               "&propertyLabelType=PropertyPath"
+               "&cultureCode=sv-SE"
+               "&gzip=true"
+               "&sensitiveObservations=false"
+        )
 
-            # Send HTTP request and load response into pandas dataframe
-            response = urllib.request.urlopen(req)
-            return response
-        except Exception as e:
-            print(e)
+        # save_path = '/testing/medium_observations.csv'
+        req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(API.body).encode("utf-8")))
+        req.get_method = lambda: 'POST'
 
-    def transform_observations(json_data, table_name, file_name):
-        try:
-            df = pd.read_json(json_data)
-            df = pd.json_normalize(df['records'], max_level=1)
-            # CHANGE: File path when populating with whole dataset
-            df.to_csv(file_name, index=False)
-        except Exception as e:
-            print(e)
+        # with urllib.request.urlopen(req) as response:
+        #     data = response.read()
 
-    # CHANGE: Function name
-    def populate_database():
-        try:
-            db = fenologikDb(os.environ['DATABASE_URL'])
-            session = db.get_session()
-            conn = session.connection().connection
-            cur = conn.cursor()
+        response = urllib.request.urlopen(req)
+        return response
 
-            # CHANGE: File path when populating with whole dataset
-            with open('testing/observations.csv', 'r') as f:
-                next(f) # Skip the header row.
-                cur.copy_from(f, 'observations', columns=('startDate', 'endDate', 'latitude', 'longitude', 'taxonId'), sep=',')
-                conn.commit()
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            z.extractall(csv_save_path)
 
-            session.close()
-        except Exception as e:
-            print(e)
-
+    def transform_observations(json_data, column, file_name):
+        df = pd.read_json(json_data)
+        df = pd.json_normalize(df[column], max_level=1)
+        # CHANGE: File path when populating with whole dataset
+        df.to_csv(file_name, index=False)
 
 ##################################################
 ### Functions for updating taxon list from API ###
