@@ -139,12 +139,6 @@ class API:
             print(f"Number of observations in data provider {i}:")
             API.obs_count(API.body)
 
-# To do: Add function for updating taxon list from API (what interval?)
-# To do Add function for updating observations from API (what interval?)
-#     - It seems like some days include more than 25 000 observations (maximum allowed by obs_export_download function),
-#       maybe use TimeRangeDto[Morning , Forenoon , Afternoon , Evening , Night]? Uses more up-to-date data and removes risk of overlapping requests 
-# To do: Observations need timestamp. Include in date column or add new column?
-
 ##############################################################
 ### Functions for collecting observation data from SOS API ###
 ##############################################################

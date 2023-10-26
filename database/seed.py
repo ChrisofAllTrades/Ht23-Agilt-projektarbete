@@ -29,18 +29,21 @@ class Seed_Db:
         
         # Loop through API dataset until all observations have been collected
         while obs_count > 0:
-            endDateStr = endDate.strftime('%Y%m%d')
-            startDateStr = startDate.strftime('%Y%m%d')
+            endDateStr = endDate.strftime("%Y%m%d")
+            startDateStr = startDate.strftime("%Y%m%d")
 
-            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
+            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/GeoJson"
                 f"?descripion={startDateStr}-{endDateStr}"
                 "&validateSearchFilter=true"
-                "&propertyLabelType=PropertyPath"
                 "&sensitiveObservations=false"
                 "&sendMailFromZendTo=true"
                 "&cultureCode=sv-SE"
             )
             
+            # Request header
+            hdr = API.hdr
+            hdr["Authorization"] = os.environ["AUTH_TOKEN"]
+
             # Request body
             body = {
                 "output": {
@@ -49,10 +52,6 @@ class Seed_Db:
                         "taxon.id",
                         "event.startDate",
                         "event.endDate",
-                        "event.plainStartTime",
-                        "event.plainEndTime",
-                        "location.Sweref99TmX",
-                        "location.Sweref99TmY"
                     ]
                 },
                 "date": {
