@@ -12,6 +12,7 @@ class Taxa(Base):
     swedishName = Column(String)
     englishName = Column(String)
     observation = relationship('Observations', backref='taxa')
+    # FIX: Add taxon hierarchy id
 
     def __repr__(self):
         return f"<Taxa(id={self.id}, scientificName={self.scientificName}, swedishName={self.swedishName}, englishName={self.englishName})>"

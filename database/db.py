@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from database.models import Base
+import geopandas as gpd
+import pandas as pd
 import os
+
+from database.models import Base
 
 # To do: Clean up class to separate database functions from query functions
 
@@ -33,20 +36,55 @@ class fenologikDb:
             conn.execute(text("""
                 ALTER TABLE observations 
                 ALTER COLUMN id 
-                SET DEFAULT nextval('observations_id_seq');
+                SET DEFAULT nextval("observations_id_seq");
             """))
+    
+    # Creates an id from OccurrenceId column in GeoJson file to use as PK in observations table
+    def extract_id(data):
+        gdf = gpd.read_file(data)
+
+        urn_mapping = {
+            "urn:lsid:artportalen.se:sighting": 999,
+            # Add more mappings here if needed
+        }
+
+        occurrence_id = gdf["OccurrenceId"]
+        split_id = occurrence_id.str.rsplit(":", n=1, expand=False)
+        # print(split_id)
+
+        urn_prefix = split_id.apply(lambda x: x[0])
+        number = split_id.apply(lambda x: x[1])
+        
+        urn_id = urn_prefix.map(urn_mapping)
+        obs_id = urn_id.astype(str) + number.astype(str)
+
+        print(obs_id)
+
+    # Transform data to match database columns
+    def transform_data(self, data):
+        gdf = gpd.read_file(data)
+
+        # Extract the necessary data from the GeoDataFrame
+        df = pd.DataFrame({
+            "id": fenologikDb.extract_id(data),
+            "startDate": gdf["properties.StartDate"],
+            "endDate": gdf["properties.EndDate"],
+            "latitude": gdf["geometry.y"],
+            "longitude": gdf["geometry.x"],
+            "taxonId": gdf["properties.DyntaxaTaxonId"]
+        })
 
     # CHANGE: Function name
     def populate_database():
-        db = fenologikDb(os.environ['DATABASE_URL'])
+        db = fenologikDb(os.environ["DATABASE_URL"])
         session = db.get_session()
         conn = session.connection().connection
         cur = conn.cursor()
 
         # CHANGE: File path when populating with whole dataset
-        with open('testing/observations.csv', 'r') as f:
+        with open("testing/observations.csv", "r") as f:
             next(f) # Skip the header row.
-            cur.copy_from(f, 'observations', columns=('startDate', 'endDate', 'latitude', 'longitude', 'taxonId'), sep=',')
+            cur.copy_from(f, "observations", columns=("startDate", "endDate", "latitude", "longitude", "taxonId"), sep=",")
             conn.commit()
 
         session.close()
@@ -70,6 +108,7 @@ class fenologikDb:
         # urn_to_url_mapping = {
         #     'urn:Isid:artportalen.se:Sighting:': 'https://artportalen.se/Sighting/',
         #     'urn:Isid:inaturalist.org:observation:': 'https://www.inaturalist.org/observations/',
+        #     # Add more mappings here
         # }    
 
         # for 'urn:Isid:' in column(observations.id):
