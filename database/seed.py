@@ -1,22 +1,14 @@
-import pandas as pd
-import json
-import urllib.request
-import zipfile
-import io
-import os
-# from sqlalchemy import create_engine # MetaData, Table, Column, Integer, String
-# from sqlalchemy.orm import sessionmaker
-from dateutil.relativedelta import relativedelta
 from datetime import datetime
+import json
+import os
+
+from dateutil.relativedelta import relativedelta
+import pandas as pd
+from urllib import request
+
 from database.api import API
 
-# Change to DwC-A or keep CSV format?
-#   I don't see the need for it right now
-# To do: Add function for Exports_OrderCsv (2 000 000 observations max per call)
-#   - Observations need timestamp.
-
 class seed_Db:
-
     def __init__():
         pass
 
@@ -36,18 +28,21 @@ class seed_Db:
         
         # Loop through API dataset until all observations have been collected
         while obs_count > 0:
-            endDateStr = endDate.strftime('%Y%m%d')
-            startDateStr = startDate.strftime('%Y%m%d')
+            endDateStr = endDate.strftime("%Y%m%d")
+            startDateStr = startDate.strftime("%Y%m%d")
 
-            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/Csv"
+            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/GeoJson"
                 f"?descripion={startDateStr}-{endDateStr}"
                 "&validateSearchFilter=true"
-                "&propertyLabelType=PropertyPath"
                 "&sensitiveObservations=false"
                 "&sendMailFromZendTo=true"
                 "&cultureCode=sv-SE"
             )
             
+            # Request header
+            hdr = API.hdr
+            hdr["Authorization"] = os.environ["AUTH_TOKEN"]
+
             # Request body
             body = {
                 "output": {
@@ -56,10 +51,6 @@ class seed_Db:
                         "taxon.id",
                         "event.startDate",
                         "event.endDate",
-                        "event.plainStartTime",
-                        "event.plainEndTime",
-                        "location.Sweref99TmX",
-                        "location.Sweref99TmY"
                     ]
                 },
                 "date": {
@@ -93,16 +84,22 @@ class seed_Db:
                 else: 
                     startDate = endDate - relativedelta(years=400)
                 
-                # Request query to download observations as CSV
-                req = urllib.request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+                # Request query to download observations as GeoJSON
+                req = request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
                 req.get_method = lambda: "POST"
 
-                with urllib.request.urlopen(req) as response:
+                # Opens the request url and reads the response
+                with request.urlopen(req) as response:
                     data = response.read()
                     status_message = data.decode("utf-8")
+                    
+                    # Adds status id to dictionary and prints the id of the last request
                     request_status_dict[startDate.strftime("%Y%m%d") + "-" + endDate.strftime("%Y%m%d")] = status_message
-                    print(status_message)
+                    last_key = list(request_status_dict.keys())[-1]
+                    last_value = request_status_dict[last_key]
+                    print(f"Status id for request {last_key}: {last_value}")
 
+                # Pauses loop after first iteration to allow for manual inspection of data before continuing
                 if first_iteration:
                     input("Check received data before continuing")
                     startDate = endDate - relativedelta(months=6)
@@ -110,10 +107,10 @@ class seed_Db:
 
             # If observation count exceeds 2 000 000, narrow search
             elif obs_count > 2000000:
-                print('\033[1;31mToo many observations, narrowing search\033[0m')
+                print("\033[1;31mToo many observations, narrowing search\033[0m")
                 startDate = startDate + relativedelta(months=1)
             
-            print("Export orders made: " + str(export_orders_count) + ". Now filtering between", startDate.strftime("%Y-%m-%d"), "and", endDate.strftime("%Y-%m-%d"))  
+            print("Export orders made: " + str(export_orders_count) + ". Now filtering between", startDateStr, "and", endDateStr)  
 
     # Retrieve taxon list from SOS API
     def taxon_list():
@@ -124,10 +121,10 @@ class seed_Db:
             "outputFields": ["id", "scientificname", "swedishname", "englishname"]
             }
 
-        req = urllib.request.Request(url, headers=API.hdr, data = bytes(json.dumps(body).encode("utf-8")))
-        req.get_method = lambda: 'POST'
+        req = request.Request(url, headers=API.hdr, data = bytes(json.dumps(body).encode("utf-8")))
+        req.get_method = lambda: "POST"
 
-        response = urllib.request.urlopen(req)
+        response = request.urlopen(req)
         df = pd.read_json(response)
 
-        df.to_csv('taxon_list.csv', index=False)
+        df.to_csv("taxon_list.csv", index=False)

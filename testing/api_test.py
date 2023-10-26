@@ -1,10 +1,15 @@
-from database.seed import seed_Db
 from database.api import API
+from database.db import fenologikDb
+from database.seed import seed_Db
 
 # observations_export('testing/medium_dataset')
+#seed_Db.obs_query_loop()
+
 #API.auth_token()
-seed_Db.obs_query_loop()
-# API.transform_observations(API.get_observations(), "test.csv")
-#API.obs_export_download("medium_test.csv")
+API.get_observations()
+#API.obs_export_download("medium_test")
+#API.dataProvider_obs_count()
+
+#fenologikDb.extract_id("testing/full_dataset/2/Observations.geojson")
 
 # input("")
