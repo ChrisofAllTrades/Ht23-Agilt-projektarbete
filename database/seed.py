@@ -13,58 +13,6 @@ class Seed_Db:
     def __init__():
         pass
 
-    # SOS API query loop for collecting entire observations dataset
-    # 2 000 000 observations max per call.
-    def obs_query_loop():
-        endDate = datetime.today().date()
-        startDate = endDate - relativedelta(days=1)
-        
-        # endDate = datetime(2023, 10, 24)
-        # startDate = datetime(2023, 10, 14)
-
-        obs_count = 1
-        first_iteration = True
-        export_orders_count = 0
-        request_status_dict = {}
-        
-        # Loop through API dataset until all observations have been collected
-        while obs_count > 0:
-            endDateStr = endDate.strftime("%Y%m%d")
-            startDateStr = startDate.strftime("%Y%m%d")
-
-            url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Order/GeoJson"
-                f"?descripion={startDateStr}-{endDateStr}"
-                "&validateSearchFilter=true"
-                "&sensitiveObservations=false"
-                "&sendMailFromZendTo=true"
-                "&cultureCode=sv-SE"
-            )
-            
-            # Request header
-            hdr = API.hdr
-            hdr["Authorization"] = os.environ["AUTH_TOKEN"]
-
-            # Request body
-            body = {
-                "output": {
-                    "fields": [
-                        "occurrence.occurrenceId",
-                        "taxon.id",
-                        "event.startDate",
-                        "event.endDate",
-                    ]
-                },
-                "date": {
-                    "startDate": startDate.strftime('%Y-%m-%d'),
-                    "endDate": endDate.strftime('%Y-%m-%d'),
-                },
-                "taxon": {
-                    "includeUnderlyingTaxa": True,
-                    "ids": [4000104]
-                }
-            }
-
-
 
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
@@ -170,7 +118,6 @@ class Seed_Db:
                 startDate = date_range_adjustment(obs_count, endDate, startDate)
                 print(f"\033[91mToo many observations, narrowing search to between {startDate} and {endDate}\033[0m")
         
-
 
     # Retrieve taxon list from SOS API
     def taxon_list():
