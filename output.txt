@@ -1,0 +1,58 @@
+2625014
+Too many observations, narrowing search to between 2023-06-21 and 2023-10-29
+1457287
+Too few observations, widening search to between 2023-05-22 and 2023-10-29
+1974963
+Status id for request 20230522-20231029: 653eb3396a2ed4326209c947
+Export orders made: 1 (1974963 total observations). Now filtering between 2022-11-21 and 2023-05-21
+Check received data before continuing
+2449255
+Too many observations, narrowing search to between 2023-01-03 and 2023-05-21
+2183713
+Too many observations, narrowing search to between 2023-01-27 and 2023-05-21
+1956419
+Status id for request 20230127-20230521: 653ebafd6a2ed4326209c949
+Export orders made: 2 (3931382 total observations). Now filtering between 2022-07-26 and 2023-01-26
+1725062
+Too few observations, widening search to between 2022-07-13 and 2023-01-26
+1852352
+Status id for request 20220713-20230126: 653ebaff6a2ed4326209c94b
+Export orders made: 3 (5783734 total observations). Now filtering between 2022-01-12 and 2022-07-12
+2865588
+Too many observations, narrowing search to between 2022-03-27 and 2022-07-12
+2045715
+Too many observations, narrowing search to between 2022-04-12 and 2022-07-12
+1794286
+Too few observations, widening search to between 2022-04-12 and 2022-07-12
+1794286
+Too few observations, widening search to between 2022-04-21 and 2022-07-12
+1553573
+Too few observations, widening search to between 2022-04-07 and 2022-07-12
+1879402
+Status id for request 20220407-20220712: 653ebb046a2ed4326209c94d
+Export orders made: 4 (7663136 total observations). Now filtering between 2021-10-06 and 2022-04-06
+1912883
+Status id for request 20211006-20220406: 653ebb056a2ed4326209c94f
+Export orders made: 5 (9576019 total observations). Now filtering between 2021-04-05 and 2021-10-05
+Check received data before continuing
+3015011
+Too many observations, narrowing search to between 2021-06-23 and 2021-10-05
+1305900
+Too few observations, widening search to between 2021-05-13 and 2021-10-05
+2144357
+Too many observations, narrowing search to between 2021-06-05 and 2021-10-05
+1578725
+Too few observations, widening search to between 2021-05-21 and 2021-10-05
+1908247
+Status id for request 20210521-20211005: 653ebb556a2ed4326209c951
+Export orders made: 6 (11484266 total observations). Now filtering between 2020-11-20 and 2021-05-20
+2554020
+Too many observations, narrowing search to between 2021-01-15 and 2021-05-20
+2073249
+Too many observations, narrowing search to between 2021-02-01 and 2021-05-20
+1915918
+Status id for request 20210201-20210520: 653ebb586a2ed4326209c953
+Export orders made: 7 (13400184 total observations). Now filtering between 2020-07-31 and 2021-01-31
+2003216
+Too many observations, narrowing search to between 2020-08-15 and 2021-01-31
+1828031
