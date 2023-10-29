@@ -8,7 +8,7 @@ import zipfile
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 
-from database.db import fenologikDb
+from database.db import FenologikDb
 
 # To do: Add function for updating taxon list from API (what interval?)
 # To do Add function for updating observations from API (what interval?)
@@ -79,6 +79,8 @@ class API:
     body = {
         "output": {
             "fields": [
+            "occurrence.occurrenceId",
+            "occurrence.organismQuantityInt",
             "taxon.id",
             "event.startDate",
             "event.endDate",
@@ -111,12 +113,12 @@ class API:
             data = response.read()
             count = data.decode("utf-8")
             print(count)
-            return count
+            return int(count)
     
     # Outputs the total number of observations for each data provider
     def dataProvider_obs_count():
         # Loop through data providers 1-24 (listed here: https://github.com/biodiversitydata-se/SOS/blob/master/Docs/DataProviders.md)
-        for i in range(1, 25):
+        for i in [1, 9, 18, 19, 20, 21, 22, 23]:
             # Request body
             body_count = {
                 "dataProvider": {
@@ -150,10 +152,16 @@ class API:
         req = request.Request(url, headers=API.hdr, data=bytes(json.dumps(API.body).encode("utf-8")))
         req.get_method = lambda: "POST"
 
+        # # Set the display options
+        # pd.set_option('display.max_rows', None)
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.width', None)
+        # pd.set_option('display.max_colwidth', None)
+
         # Send HTTP request and load response into pandas dataframe
         response = request.urlopen(req)
-        #return response
-        print(response)
+        return response
+        # print(pd.read_json(response))
 
     # Transforms response from get_observations() into a pandas dataframe and saves it as a CSV file
     # FIX: Doesn't work properly (only adds columns with empty values)
@@ -164,9 +172,9 @@ class API:
         df = pd.json_normalize(df[column], max_level=1)
         df.to_csv(file_name, index=False)
         
-    # Uses Exports_DownloadCsv operation of the SOS API to download observations as CSV
+    # Uses Exports_DownloadGeoJson operation of the SOS API to download observations as GeoJson
     # 25 000 observations max per call, throws error 400 if exceeded
-    def obs_export_download(csv_save_path):
+    def obs_export_download(geojson_save_directory):
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Exports/Download/GeoJson"
                "?validateSearchFilter=true"
                "&cultureCode=sv-SE"
@@ -180,7 +188,7 @@ class API:
             data = response.read()
 
         with zipfile.ZipFile(io.BytesIO(data)) as z:
-            z.extractall(csv_save_path)
+            z.extractall(geojson_save_directory)
 
 ##################################################
 ### Functions for updating taxon list from API ###

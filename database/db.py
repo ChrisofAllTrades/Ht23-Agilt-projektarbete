@@ -1,8 +1,9 @@
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+import os
+
 import geopandas as gpd
 import pandas as pd
-import os
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
 
 from database.models import Base
 
@@ -12,7 +13,7 @@ from database.models import Base
 ### Database class and query functions ###
 ##########################################
 
-class fenologikDb:
+class FenologikDb:
     def __init__(self, database_uri):
         self.engine = create_engine(database_uri, echo=True)
         self.Session = sessionmaker(bind=self.engine)
@@ -39,53 +40,86 @@ class fenologikDb:
                 SET DEFAULT nextval("observations_id_seq");
             """))
     
-    # Creates an id from OccurrenceId column in GeoJson file to use as PK in observations table
-    def extract_id(data):
+    # Creates a primary key id for observations table from id column in GeoJson file
+    def generate_pk(data):
         gdf = gpd.read_file(data)
 
+        # Mapping between URN prefix and id corresponding to data provider id plus a leading 0 if < 10, e.g. 01 for Artportalen)
         urn_mapping = {
-            "urn:lsid:artportalen.se:sighting": 999,
-            # Add more mappings here if needed
+            "urn:lsid:artportalen.se:sighting:": "01",
+            "NRM:RingedBirds:": "09",
+            "biologg-": "18",
+            "https://www.inaturalist.org/observations/": "19",
+            "SFTkfr:": "20",
+            "SFTspkt:": "21",
+            "SFTstd:": "22",
+            "KBV:occurrenceID:": "23"
         }
 
-        occurrence_id = gdf["OccurrenceId"]
-        split_id = occurrence_id.str.rsplit(":", n=1, expand=False)
-        # print(split_id)
+        # Extract the id column from the GeoDataFrame
+        occurrence_id = gdf["id"]
+        
+        # Split the OccurrenceId column into two columns, one with the URN prefix and one with the id
+        def split_id(occurrence_id):
+            if occurrence_id.startswith("biologg-"):
+                index = occurrence_id.rfind("-")
+            elif occurrence_id.startswith("https://www.inaturalist.org/observations/"):
+                index = occurrence_id.rfind("/")
+            elif occurrence_id.startswith("SFT"):
+                index = occurrence_id.find(":")
+            else:
+                index = occurrence_id.rfind(":")
+            
+            return [occurrence_id[:index+1], occurrence_id[index+1:]]
+            
+        split_id = occurrence_id.apply(split_id)
 
+        # Extract the URN prefix and id from the split OccurrenceId column
         urn_prefix = split_id.apply(lambda x: x[0])
         number = split_id.apply(lambda x: x[1])
-        
+      
+        # Map the URN prefix to the corresponding id
         urn_id = urn_prefix.map(urn_mapping)
         obs_id = urn_id.astype(str) + number.astype(str)
-
-        print(obs_id)
+                
+        return obs_id
 
     # Transform data to match database columns
-    def transform_data(self, data):
+    def transform_data(data):
         gdf = gpd.read_file(data)
 
         # Extract the necessary data from the GeoDataFrame
         df = pd.DataFrame({
-            "id": fenologikDb.extract_id(data),
-            "startDate": gdf["properties.StartDate"],
-            "endDate": gdf["properties.EndDate"],
-            "latitude": gdf["geometry.y"],
-            "longitude": gdf["geometry.x"],
-            "taxonId": gdf["properties.DyntaxaTaxonId"]
+            "id": FenologikDb.generate_pk(data).astype(str),
+            "startDate": gdf["StartDate"],
+            "endDate": gdf["EndDate"],
+            "latitude": gdf["geometry"].y,
+            "longitude": gdf["geometry"].x,
+            "taxonId": gdf["DyntaxaTaxonId"],
+            "organismQuantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
         })
 
+        # Set the display options
+        # pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', None)
+        pd.set_option('display.max_colwidth', None)
+        
+        return df
+
     # CHANGE: Function name
-    def populate_database():
-        db = fenologikDb(os.environ["DATABASE_URL"])
+    def populate_database(data):
+
+        db = FenologikDb(os.environ["DATABASE_URL"])
         session = db.get_session()
         conn = session.connection().connection
         cur = conn.cursor()
 
         # CHANGE: File path when populating with whole dataset
-        with open("testing/observations.csv", "r") as f:
-            next(f) # Skip the header row.
-            cur.copy_from(f, "observations", columns=("startDate", "endDate", "latitude", "longitude", "taxonId"), sep=",")
-            conn.commit()
+        transformed_data = FenologikDb.transform_data(data)
+        # next(f) # Skip the header row.
+        transformed_data.to_sql('observations', session.bind, if_exists='append', index=False)
+        conn.commit()
 
         session.close()
 

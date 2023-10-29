@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Sequence, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
+# To do: Create table for square grid
 
 Base = declarative_base()
 
@@ -12,6 +14,7 @@ class Taxa(Base):
     swedishName = Column(String)
     englishName = Column(String)
     observation = relationship('Observations', backref='taxa')
+    # taxonCategory = Column()
     # FIX: Add taxon hierarchy id
 
     def __repr__(self):
@@ -20,12 +23,13 @@ class Taxa(Base):
 class Observations(Base):
     __tablename__ = 'observations'
 
-    id = Column(Integer, Sequence('observations_id_seq'), primary_key=True)
+    id = Column(String, primary_key=True)
     startDate = Column(DateTime)
     endDate = Column(DateTime)
     latitude = Column(Float)
     longitude = Column(Float)
     taxonId = Column(Integer, ForeignKey('taxa.id'))
+    organismQuantity = Column(Integer)
 
-    def __repr__(self):
-        return f"<Observations(id={self.id}, startDate={self.startDate}, endDate={self.endDate}, latitude={self.latitude}, longitude={self.longitude})>"
+    def __repr__(self): 
+        return f"<Observations(id={self.id}, startDate={self.startDate}, endDate={self.endDate}, latitude={self.latitude}, longitude={self.longitude}, organismQuantity={self.organismQuantity})>"
