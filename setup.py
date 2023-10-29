@@ -1,5 +1,5 @@
-from database.db import fenologikDb
-import database.api as api
+from database.api import API
+from database.db import FenologikDb
 import os
 
 ######################
@@ -7,7 +7,7 @@ import os
 ######################
 
 # Connect to database
-db = fenologikDb(os.environ['DATABASE_URL'])
+db = FenologikDb(os.environ['DATABASE_URL'])
 
 # # Create tables
 db.setup()
@@ -18,4 +18,4 @@ db.setup()
 input("Pause for manual database setup. Refer to item 5. in Database Setup in README.md. When done, press enter to continue.")
 
 # Populate tables with test data in testing/observations.csv
-api.populate_database()
+API.populate_database()
