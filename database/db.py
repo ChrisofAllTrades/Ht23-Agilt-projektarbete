@@ -1,10 +1,9 @@
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, load_only
-from database.models import Base, Observations, Taxa
-import pandas as pd
-# Test-imports
+from sqlalchemy.orm import sessionmaker
+from database.models import Base
 import os
 
+# To do: Clean up class to separate database functions from query functions
 
 ##########################################
 ### Database class and query functions ###
@@ -18,17 +17,12 @@ class fenologikDb:
     def get_session(self):
         return self.Session()
 
-    def query(self, model, filters=None):
-        session = self.get_session()
-        query = session.query(model)
-
-        if filters:
-            query = query.filter(*filters)
-
-        result = query.all()
-        session.close()
-        return result
-
+    # def query(self, model):
+    #     session = self.get_session()
+    #     result = session.query(model).all()
+    #     session.close()
+    #     return result
+    
     def setup(self):
         Base.metadata.create_all(self.engine)
 
@@ -42,6 +36,21 @@ class fenologikDb:
                 SET DEFAULT nextval('observations_id_seq');
             """))
 
+    # CHANGE: Function name
+    def populate_database():
+        db = fenologikDb(os.environ['DATABASE_URL'])
+        session = db.get_session()
+        conn = session.connection().connection
+        cur = conn.cursor()
+
+        # CHANGE: File path when populating with whole dataset
+        with open('testing/observations.csv', 'r') as f:
+            next(f) # Skip the header row.
+            cur.copy_from(f, 'observations', columns=('startDate', 'endDate', 'latitude', 'longitude', 'taxonId'), sep=',')
+            conn.commit()
+
+        session.close()
+
 ################################
 ### Add query functions here ###
 ################################
@@ -53,59 +62,18 @@ class fenologikDb:
     def post_observations(observations):
         pass
 
-    def observations_in_df(self, model, filters):
-        observations = self.query(model, filters=filters)
+    # Mock code for retrieving the source url of an observation (e.g. Artportalen, iNaturalist, etc.)
+    # Depends on how urn info is stored in the database
+    def external_obs_link():
+        pass
+        # # Unsure if it's better to define the mapping here or as a class variable
+        # urn_to_url_mapping = {
+        #     'urn:Isid:artportalen.se:Sighting:': 'https://artportalen.se/Sighting/',
+        #     'urn:Isid:inaturalist.org:observation:': 'https://www.inaturalist.org/observations/',
+        # }    
 
-        data = []
-        for obs in observations:
-            data.append({
-                "longitude": obs.longitude,
-                "latitude": obs.latitude,
-            })
-
-        df = pd.DataFrame(data)
-        return df    
-
-    def get_unique_species_for_dropdown(self, model):
-        session = self.get_session()
-        try:
-            query = session.query(model).distinct(model.swedishName)
-            result = [row.swedishName for row in query.all()]
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            result = None
-        finally:
-            session.close()
-        return result
-    
-    def get_unique_species_for_dropdown_test(self, model):
-        try:
-            session = self.get_session()
-            session.begin()
-            query = session.query(model).distinct(model.swedishName)
-            results = query.all()
-
-            result = [row.swedishName for row in results]
-            session.commit()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            print(f"Error type: {type(e)}")
-            session.rollback()
-            result = None
-        finally:
-            session.close()
-        return result
-
-    def get_taxon_id(self, swedish_name):
-        session = self.get_session()
-        result = session.query(Observations, Taxa).\
-                join(Taxa, Observations.taxonId == Taxa.id).\
-                filter(Taxa.swedishName == swedish_name).\
-                first()
-    
-        session.close()
-    
-        if result:
-            return result.Taxa.id  # Returnerar taxonid från Taxa-tabellen
-        else:
-            return None
+        # for 'urn:Isid:' in column(observations.id):
+        #     if 'urn:Isid:' == 'artportalen.se:Sighting:':
+        #         link = urn_to_url_mapping.get('urn:Isid:artportalen.se:Sighting:') + observations.id
+        #     elif 'urn:Isid:' == 'inaturalist.org:observation:':
+        #         link = urn_to_url_mapping.get('urn:Isid:inaturalist.org:observation:') + observations.id
