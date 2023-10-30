@@ -155,7 +155,7 @@ class FenologikDb:
 
     # CHANGE: Function name
     def populate_database():
-        db = fenologikDb(os.environ['DATABASE_URL'])
+        db = FenologikDb(os.environ['DATABASE_URL'])
         session = db.get_session()
         conn = session.connection().connection
         cur = conn.cursor()
