@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, LargeBinary, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -10,9 +10,9 @@ class Taxa(Base):
     __tablename__ = 'taxa'
 
     id = Column(Integer, primary_key=True)
-    scientificName = Column('scientificname',String, nullable=False)
-    swedishName = Column('swedishname',String)
-    englishName = Column('englishname',String)
+    scientificName = Column(String, nullable=False)
+    swedishName = Column(String)
+    englishName = Column(String)
     observation = relationship('Observations', backref='taxa')
     # taxonCategory = Column()
     # FIX: Add taxon hierarchy id
@@ -34,3 +34,14 @@ class Observations(Base):
 
     def __repr__(self): 
         return f"<Observations(id={self.id}, startDate={self.startDate}, endDate={self.endDate}, latitude={self.latitude}, longitude={self.longitude}, organismQuantity={self.organismQuantity})>"
+   
+class Tile(Base):
+    __tablename__ = 'tiles'
+    
+    id = Column(Integer, primary_key=True)
+    z = Column(Float, nullable=False)
+    y = Column(Float, nullable=False)
+    x = Column(Float, nullable=False)
+    tile_data = Column(LargeBinary, nullable=False)
+    def __repr__(self):
+        return f"<Tile(id={self.id}, z={self.z}, y={self.y}, x={self.x}, tileData={self.tile_data})>"
