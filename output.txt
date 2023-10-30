@@ -55,4 +55,268 @@ Status id for request 20210201-20210520: 653ebb586a2ed4326209c953
 Export orders made: 7 (13400184 total observations). Now filtering between 2020-07-31 and 2021-01-31
 2003216
 Too many observations, narrowing search to between 2020-08-15 and 2021-01-31
-1828031
+18280312003216
+[91mToo many observations, narrowing search to between 2020-08-16 and 2021-01-31[0m
+1814389
+Status id for request 20200816-20210131: 653f35ca6a2ed4326209c955
+Export orders made: 1 (1814389 total observations). Now filtering between 2020-02-15 and 2020-08-15
+Check received data before continuing2934001
+[91mToo many observations, narrowing search to between 2020-04-19 and 2020-08-15[0m
+2053607
+[91mToo many observations, narrowing search to between 2020-05-11 and 2020-08-15[0m
+1483883
+[93mToo few observations, widening search to between 2020-04-21 and 2020-08-15[0m
+2001970
+[91mToo many observations, narrowing search to between 2020-04-30 and 2020-08-15[0m
+1795187
+[93mToo few observations, widening search to between 2020-05-05 and 2020-08-15[0m
+1643103
+[93mToo few observations, widening search to between 2020-04-21 and 2020-08-15[0m
+2001970
+[91mToo many observations, narrowing search to between 2020-04-26 and 2020-08-15[0m
+1881865
+Status id for request 20200426-20200815: 653f35e06a2ed4326209c957
+Export orders made: 2 (3696254 total observations). Now filtering between 2019-10-25 and 2020-04-25
+1859299
+Status id for request 20191025-20200425: 653f35e16a2ed4326209c959
+Export orders made: 3 (5555553 total observations). Now filtering between 2019-04-24 and 2019-10-24
+2333003
+[91mToo many observations, narrowing search to between 2019-06-06 and 2019-10-24[0m
+1462164
+[93mToo few observations, widening search to between 2019-05-02 and 2019-10-24[0m
+2143958
+[91mToo many observations, narrowing search to between 2019-05-20 and 2019-10-24[0m
+1784064
+[93mToo few observations, widening search to between 2019-05-15 and 2019-10-24[0m
+1896082
+Status id for request 20190515-20191024: 653f35e76a2ed4326209c95b
+Export orders made: 4 (7451635 total observations). Now filtering between 2018-11-14 and 2019-05-14
+1850048
+Status id for request 20181114-20190514: 653f35e96a2ed4326209c95d
+Export orders made: 5 (9301683 total observations). Now filtering between 2018-05-13 and 2018-11-13
+1912101
+Status id for request 20180513-20181113: 653f35ea6a2ed4326209c95f
+Export orders made: 6 (11213784 total observations). Now filtering between 2017-11-12 and 2018-05-12
+Six simultaneous requests made, which is the API limit. Await response before continuing1646590
+[93mToo few observations, widening search to between 2017-10-20 and 2018-05-12[0m
+1809284
+Status id for request 20171020-20180512: 653f4f556a2ed4326209c962
+Export orders made: 7 (13023068 total observations). Now filtering between 2017-04-19 and 2017-10-19
+2094150
+[91mToo many observations, narrowing search to between 2017-05-12 and 2017-10-19[0m
+1720982
+[93mToo few observations, widening search to between 2017-05-03 and 2017-10-19[0m
+1878535
+Status id for request 20170503-20171019: 653f4f597f743f6f3b6b0d7f
+Export orders made: 8 (14901603 total observations). Now filtering between 2016-11-02 and 2017-05-02
+1441222
+[93mToo few observations, widening search to between 2016-09-09 and 2017-05-02[0m
+1979972
+Status id for request 20160909-20170502: 653f4f5b7f743f6f3b6b0d81
+Export orders made: 9 (16881575 total observations). Now filtering between 2016-03-08 and 2016-09-08
+2133065
+[91mToo many observations, narrowing search to between 2016-04-06 and 2016-09-08[0m
+1789152
+[93mToo few observations, widening search to between 2016-03-26 and 2016-09-08[0m
+1970366
+Status id for request 20160326-20160908: 653f4f5e7f743f6f3b6b0d83
+Export orders made: 10 (18851941 total observations). Now filtering between 2015-09-25 and 2016-03-25
+1131410
+[93mToo few observations, widening search to between 2015-05-20 and 2016-03-25[0m
+2340189
+[91mToo many observations, narrowing search to between 2015-07-17 and 2016-03-25[0m
+1693292
+[93mToo few observations, widening search to between 2015-06-21 and 2016-03-25[0m
+1919398
+Status id for request 20150621-20160325: 653f4f616a2ed4326209c964
+Export orders made: 11 (20771339 total observations). Now filtering between 2014-12-20 and 2015-06-20
+2011383
+[91mToo many observations, narrowing search to between 2015-01-04 and 2015-06-20[0m
+1891866
+Status id for request 20150104-20150620: 653f4f646a2ed4326209c966
+Export orders made: 12 (22663205 total observations). Now filtering between 2014-07-03 and 2015-01-03
+Six simultaneous requests made, which is the API limit. Await response before continuing1515109
+[93mToo few observations, widening search to between 2014-05-10 and 2015-01-03[0m
+2278586
+[91mToo many observations, narrowing search to between 2014-06-21 and 2015-01-03[0m
+1631298
+[93mToo few observations, widening search to between 2014-05-25 and 2015-01-03[0m
+1996251
+Status id for request 20140525-20150103: 653f7aa57f743f6f3b6b0db0
+Export orders made: 13 (24659456 total observations). Now filtering between 2013-11-24 and 2014-05-24
+1783187
+[93mToo few observations, widening search to between 2013-11-21 and 2014-05-24[0m
+1794479
+[93mToo few observations, widening search to between 2013-11-17 and 2014-05-24[0m
+1812011
+Status id for request 20131117-20140524: 653f7aa87f743f6f3b6b0db3
+Export orders made: 14 (26471467 total observations). Now filtering between 2013-05-16 and 2013-11-16
+1819512
+Status id for request 20130516-20131116: 653f7aab7f743f6f3b6b0db5
+Export orders made: 15 (28290979 total observations). Now filtering between 2012-11-15 and 2013-05-15
+1463568
+[93mToo few observations, widening search to between 2012-09-28 and 2013-05-15[0m
+1853233
+Status id for request 20120928-20130515: 653f7aad6a2ed4326209c98e
+Export orders made: 16 (30144212 total observations). Now filtering between 2012-03-27 and 2012-09-27
+2073867
+[91mToo many observations, narrowing search to between 2012-04-20 and 2012-09-27[0m
+1781793
+[93mToo few observations, widening search to between 2012-04-06 and 2012-09-27[0m
+1972360
+Status id for request 20120406-20120927: 653f7ab16a2ed4326209c990
+Export orders made: 17 (32116572 total observations). Now filtering between 2011-10-05 and 2012-04-05
+1150439
+[93mToo few observations, widening search to between 2011-06-03 and 2012-04-05[0m
+2309595
+[91mToo many observations, narrowing search to between 2011-08-01 and 2012-04-05[0m
+1747833
+[93mToo few observations, widening search to between 2011-07-15 and 2012-04-05[0m
+1888090
+Status id for request 20110715-20120405: 653f7ab56a2ed4326209c992
+Export orders made: 18 (34004662 total observations). Now filtering between 2011-01-14 and 2011-07-14
+Six simultaneous requests made, which is the API limit. Await response before continuing1812004
+Status id for request 20110114-20110714: 653f9cdc7f743f6f3b6b0df1
+Export orders made: 19 (35816666 total observations). Now filtering between 2010-07-13 and 2011-01-13
+1256488
+[93mToo few observations, widening search to between 2010-04-09 and 2011-01-13[0m
+2423921
+[91mToo many observations, narrowing search to between 2010-06-09 and 2011-01-13[0m
+1548075
+[93mToo few observations, widening search to between 2010-04-21 and 2011-01-13[0m
+2276056
+[91mToo many observations, narrowing search to between 2010-06-09 and 2011-01-13[0m
+1548075
+[93mToo few observations, widening search to between 2010-04-11 and 2011-01-13[0m
+2396004
+[91mToo many observations, narrowing search to between 2010-06-02 and 2011-01-13[0m
+1642381
+[93mToo few observations, widening search to between 2010-05-02 and 2011-01-13[0m
+2116269
+[91mToo many observations, narrowing search to between 2010-05-24 and 2011-01-13[0m
+1755500
+[93mToo few observations, widening search to between 2010-05-02 and 2011-01-13[0m
+2116269
+[91mToo many observations, narrowing search to between 2010-05-27 and 2011-01-13[0m
+1723225
+[93mToo few observations, widening search to between 2010-04-29 and 2011-01-13[0m
+2171132
+[91mToo many observations, narrowing search to between 2010-05-29 and 2011-01-13[0m
+1699183
+[93mToo few observations, widening search to between 2010-05-02 and 2011-01-13[0m
+2116269
+[91mToo many observations, narrowing search to between 2010-05-21 and 2011-01-13[0m
+1806550
+Status id for request 20100521-20110113: 653f9cec6a2ed4326209c9b9
+Export orders made: 20 (37623216 total observations). Now filtering between 2009-11-20 and 2010-05-20
+1497089
+[93mToo few observations, widening search to between 2009-10-09 and 2010-05-20[0m
+1721911
+[93mToo few observations, widening search to between 2009-09-07 and 2010-05-20[0m
+1967200
+Status id for request 20090907-20100520: 653f9cf06a2ed4326209c9bb
+Export orders made: 21 (39590416 total observations). Now filtering between 2009-03-06 and 2009-09-06
+1870082
+Status id for request 20090306-20090906: 653f9cf26a2ed4326209c9bd
+Export orders made: 22 (41460498 total observations). Now filtering between 2008-09-05 and 2009-03-05
+999979
+[93mToo few observations, widening search to between 2008-03-24 and 2009-03-05[0m
+2550584
+[91mToo many observations, narrowing search to between 2008-06-11 and 2009-03-05[0m
+1600053
+[93mToo few observations, widening search to between 2008-04-24 and 2009-03-05[0m
+2217721
+[91mToo many observations, narrowing search to between 2008-06-01 and 2009-03-05[0m
+1710469
+[93mToo few observations, widening search to between 2008-05-03 and 2009-03-05[0m
+2079902
+[91mToo many observations, narrowing search to between 2008-05-24 and 2009-03-05[0m
+1811696
+Status id for request 20080524-20090305: 653f9cfb7f743f6f3b6b0df3
+Export orders made: 23 (43272194 total observations). Now filtering between 2007-11-23 and 2008-05-23
+1264967
+[93mToo few observations, widening search to between 2007-08-25 and 2008-05-23[0m
+1837798
+Status id for request 20070825-20080523: 653f9cfe6a2ed4326209c9bf
+Export orders made: 24 (45109992 total observations). Now filtering between 2007-02-24 and 2007-08-24
+Six simultaneous requests made, which is the API limit. Await response before continuing1549068
+[93mToo few observations, widening search to between 2007-01-22 and 2007-08-24[0m
+1666999
+[93mToo few observations, widening search to between 2006-12-28 and 2007-08-24[0m
+1814491
+Status id for request 20061228-20070824: 653fb7cd6a2ed4326209c9e4
+Export orders made: 25 (46924483 total observations). Now filtering between 2006-06-27 and 2006-12-27
+939081
+[93mToo few observations, widening search to between 2005-12-12 and 2006-12-27[0m
+2161636
+[91mToo many observations, narrowing search to between 2006-01-25 and 2006-12-27[0m
+2016945
+[91mToo many observations, narrowing search to between 2006-02-13 and 2006-12-27[0m
+1961487
+Status id for request 20060213-20061227: 653fb7d36a2ed4326209c9e6
+Export orders made: 26 (48885970 total observations). Now filtering between 2005-08-12 and 2006-02-12
+757139
+[93mToo few observations, widening search to between 2004-10-26 and 2006-02-12[0m
+1957860
+Status id for request 20041026-20060212: 653fb7d76a2ed4326209c9e8
+Export orders made: 27 (50843830 total observations). Now filtering between 2004-04-25 and 2004-10-25
+913719
+[93mToo few observations, widening search to between 2003-10-04 and 2004-10-25[0m
+1424579
+[93mToo few observations, widening search to between 2003-05-14 and 2004-10-25[0m
+1980559
+Status id for request 20030514-20041025: 653fb7db6a2ed4326209c9ea
+Export orders made: 28 (52824389 total observations). Now filtering between 2002-11-13 and 2003-05-13
+442361
+[93mToo few observations, widening search to between 2001-03-01 and 2003-05-13[0m
+2003085
+[91mToo many observations, narrowing search to between 2001-03-21 and 2003-05-13[0m
+1982368
+Status id for request 20010321-20030513: 653fb7df6a2ed4326209c9ec
+Export orders made: 29 (54806757 total observations). Now filtering between 2000-09-20 and 2001-03-20
+237278
+[93mToo few observations, widening search to between 1997-01-26 and 2001-03-20[0m
+1900917
+Status id for request 19970126-20010320: 653fb7e36a2ed4326209c9ee
+Export orders made: 30 (56707674 total observations). Now filtering between 1996-07-25 and 1997-01-25
+Six simultaneous requests made, which is the API limit. Await response before continuing179043
+[93mToo few observations, widening search to between 1991-06-30 and 1997-01-25[0m
+2074070
+[91mToo many observations, narrowing search to between 1991-09-27 and 1997-01-25[0m
+1981065
+Status id for request 19910927-19970125: 653fe2607f743f6f3b6b0e41
+Export orders made: 31 (58688739 total observations). Now filtering between 1991-03-26 and 1991-09-26
+222061
+[93mToo few observations, widening search to between 1987-03-19 and 1991-09-26[0m
+1434902
+[93mToo few observations, widening search to between 1985-06-22 and 1991-09-26[0m
+1782948
+[93mToo few observations, widening search to between 1984-09-27 and 1991-09-26[0m
+1942557
+Status id for request 19840927-19910926: 653fe2667f743f6f3b6b0e43
+Export orders made: 32 (60631296 total observations). Now filtering between 1984-03-26 and 1984-09-26
+166470
+[93mToo few observations, widening search to between 1978-09-27 and 1984-09-26[0m
+1140653
+[93mToo few observations, widening search to between 1974-03-31 and 1984-09-26[0m
+1912228
+Status id for request 19740331-19840926: 653fe2697f743f6f3b6b0e45
+Export orders made: 33 (62543524 total observations). Now filtering between 1973-09-30 and 1974-03-30
+39880
+[93mToo few observations, widening search to between 1949-06-09 and 1974-03-30[0m
+1027400
+[93mToo few observations, widening search to between 1926-01-02 and 1974-03-30[0m
+1043155
+[93mToo few observations, widening search to between 1881-10-19 and 1974-03-30[0m
+1046375
+[93mToo few observations, widening search to between 1797-07-30 and 1974-03-30[0m
+1048434
+[93mToo few observations, widening search to between 1637-04-11 and 1974-03-30[0m
+1048579
+[93mToo few observations, widening search to between 1331-07-24 and 1974-03-30[0m
+1048579
+Status id for request 13310724-19740330: 653fe26f7f743f6f3b6b0e47
+Export orders made: 34 (63592103 total observations). Now filtering between 1331-01-23 and 1331-07-23
+0
+Observation count is 0. Stopping.
+The status ids of the export orders are: {'20200816-20210131': '653f35ca6a2ed4326209c955', '20200426-20200815': '653f35e06a2ed4326209c957', '20191025-20200425': '653f35e16a2ed4326209c959', '20190515-20191024': '653f35e76a2ed4326209c95b', '20181114-20190514': '653f35e96a2ed4326209c95d', '20180513-20181113': '653f35ea6a2ed4326209c95f', '20171020-20180512': '653f4f556a2ed4326209c962', '20170503-20171019': '653f4f597f743f6f3b6b0d7f', '20160909-20170502': '653f4f5b7f743f6f3b6b0d81', '20160326-20160908': '653f4f5e7f743f6f3b6b0d83', '20150621-20160325': '653f4f616a2ed4326209c964', '20150104-20150620': '653f4f646a2ed4326209c966', '20140525-20150103': '653f7aa57f743f6f3b6b0db0', '20131117-20140524': '653f7aa87f743f6f3b6b0db3', '20130516-20131116': '653f7aab7f743f6f3b6b0db5', '20120928-20130515': '653f7aad6a2ed4326209c98e', '20120406-20120927': '653f7ab16a2ed4326209c990', '20110715-20120405': '653f7ab56a2ed4326209c992', '20110114-20110714': '653f9cdc7f743f6f3b6b0df1', '20100521-20110113': '653f9cec6a2ed4326209c9b9', '20090907-20100520': '653f9cf06a2ed4326209c9bb', '20090306-20090906': '653f9cf26a2ed4326209c9bd', '20080524-20090305': '653f9cfb7f743f6f3b6b0df3', '20070825-20080523': '653f9cfe6a2ed4326209c9bf', '20061228-20070824': '653fb7cd6a2ed4326209c9e4', '20060213-20061227': '653fb7d36a2ed4326209c9e6', '20041026-20060212': '653fb7d76a2ed4326209c9e8', '20030514-20041025': '653fb7db6a2ed4326209c9ea', '20010321-20030513': '653fb7df6a2ed4326209c9ec', '19970126-20010320': '653fb7e36a2ed4326209c9ee', '19910927-19970125': '653fe2607f743f6f3b6b0e41', '19840927-19910926': '653fe2667f743f6f3b6b0e43', '19740331-19840926': '653fe2697f743f6f3b6b0e45', '13310724-19740330': '653fe26f7f743f6f3b6b0e47'}

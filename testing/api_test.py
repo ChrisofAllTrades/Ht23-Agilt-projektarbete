@@ -5,7 +5,7 @@ from database.seed import Seed_Db
 
 #Observations.models()
 
-Seed_Db.obs_query_loop()
+#Seed_Db.obs_query_loop()
 
 #FenologikDb.extract_id("testing/observations_Id_Test.geojson")
 #FenologikDb.transform_data("testing/full_dataset/1/Observations.geojson")
@@ -14,6 +14,6 @@ Seed_Db.obs_query_loop()
 #API.auth_token()
 #API.get_observations()
 #API.obs_export_download("id_Testing")
-#API.dataProvider_obs_count()
+API.dataProvider_obs_count()
 
 # input("")

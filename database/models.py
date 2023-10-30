@@ -28,6 +28,7 @@ class Observations(Base):
     endDate = Column(DateTime)
     latitude = Column(Float)
     longitude = Column(Float)
+    gridId = Column(Integer)
     taxonId = Column(Integer, ForeignKey('taxa.id'))
     organismQuantity = Column(Integer)
 
