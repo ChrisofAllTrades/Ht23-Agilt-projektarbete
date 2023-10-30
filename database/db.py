@@ -25,17 +25,12 @@ class FenologikDb:
     def get_session(self):
         return self.Session()
 
-    def query(self, model, filters=None):
-        session = self.get_session()
-        query = session.query(model)
-
-        if filters:
-            query = query.filter(*filters)
-
-        result = query.all()
-        session.close()
-        return result
-
+    # def query(self, model):
+    #     session = self.get_session()
+    #     result = session.query(model).all()
+    #     session.close()
+    #     return result
+    
     def setup(self):
         Base.metadata.create_all(self.engine)
    
@@ -157,6 +152,21 @@ class FenologikDb:
                 ALTER COLUMN id 
                 SET DEFAULT nextval('observations_id_seq');
             """))
+
+    # CHANGE: Function name
+    def populate_database():
+        db = fenologikDb(os.environ['DATABASE_URL'])
+        session = db.get_session()
+        conn = session.connection().connection
+        cur = conn.cursor()
+
+        # CHANGE: File path when populating with whole dataset
+        with open('testing/observations.csv', 'r') as f:
+            next(f) # Skip the header row.
+            cur.copy_from(f, 'observations', columns=('startDate', 'endDate', 'latitude', 'longitude', 'taxonId'), sep=',')
+            conn.commit()
+
+        session.close()
 
 ################################
 ### Add query functions here ###

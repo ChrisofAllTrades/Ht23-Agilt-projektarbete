@@ -13,7 +13,10 @@ class Seed_Db:
     def __init__():
         pass
 
+class seed_Db:
 
+    def __init__():
+        pass
 
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
