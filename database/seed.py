@@ -14,6 +14,7 @@ class Seed_Db:
         pass
 
 
+
     # SOS API query loop for collecting entire observations dataset
     # 2 000 000 observations max per call.
     def obs_query_loop():
@@ -63,7 +64,7 @@ class Seed_Db:
                 # Observations per day in time range
                 obs_average = obs_count / (endDate - startDate).days
                 # Multiply by difference between target and current observation count
-                adjustment = ((obs_target - obs_count) / obs_average) - random.randint(10, 20)
+                adjustment = ((obs_target - obs_count) / obs_average) - random.randint(5, 20)
                 # Adjust time range
                 startDate = startDate - relativedelta(days=adjustment)
 
@@ -118,6 +119,7 @@ class Seed_Db:
                 startDate = date_range_adjustment(obs_count, endDate, startDate)
                 print(f"\033[91mToo many observations, narrowing search to between {startDate} and {endDate}\033[0m")
         
+
 
     # Retrieve taxon list from SOS API
     def taxon_list():

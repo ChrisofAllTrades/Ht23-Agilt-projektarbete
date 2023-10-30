@@ -100,6 +100,8 @@ class API:
         }
     }
 
+
+
     # Outputs the number of observations for a given search filter
     def obs_count(body):
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Observations/Count"
@@ -115,6 +117,8 @@ class API:
             print(count)
             return int(count)
     
+
+
     # Outputs the total number of observations for each data provider
     def dataProvider_obs_count():
         # Loop through data providers 1-24 (listed here: https://github.com/biodiversitydata-se/SOS/blob/master/Docs/DataProviders.md)
@@ -163,6 +167,8 @@ class API:
         return response
         # print(pd.read_json(response))
 
+
+
     # Transforms response from get_observations() into a pandas dataframe and saves it as a CSV file
     # FIX: Doesn't work properly (only adds columns with empty values)
     def transform_observations(json_data, column, file_name):
@@ -172,6 +178,8 @@ class API:
         df = pd.json_normalize(df[column], max_level=1)
         df.to_csv(file_name, index=False)
         
+
+
     # Uses Exports_DownloadGeoJson operation of the SOS API to download observations as GeoJson
     # 25 000 observations max per call, throws error 400 if exceeded
     def obs_export_download(geojson_save_directory):

@@ -7,6 +7,10 @@ from sqlalchemy.orm import sessionmaker
 
 from database.models import Base
 
+# To do: Finish methods for assigning gridId to observations
+# To do: Add method for processing entire dataset in chunks
+# To do: Add method for grouping observations by gridId, taxonId and datetime
+#           -  Save to new table with columns gridId, taxonId, datetime, count
 # To do: Clean up class to separate database functions from query functions
 
 ##########################################
@@ -29,17 +33,7 @@ class FenologikDb:
     
     def setup(self):
         Base.metadata.create_all(self.engine)
-
-    def table_id_sequence(self):
-        engine = self.engine
-
-        with engine.connect() as conn:
-            conn.execute(text("""
-                ALTER TABLE observations 
-                ALTER COLUMN id 
-                SET DEFAULT nextval("observations_id_seq");
-            """))
-    
+   
     # Creates a primary key id for observations table from id column in GeoJson file
     def generate_pk(data):
         gdf = gpd.read_file(data)
@@ -85,12 +79,12 @@ class FenologikDb:
         return obs_id
 
     # Transform data to match database columns
-    def transform_data(data):
+    def transform_data(self, data):
         gdf = gpd.read_file(data)
 
         # Extract the necessary data from the GeoDataFrame
         df = pd.DataFrame({
-            "id": FenologikDb.generate_pk(data).astype(str),
+            "id": self.generate_pk(data).astype(str),
             "startDate": gdf["StartDate"],
             "endDate": gdf["EndDate"],
             "latitude": gdf["geometry"].y,
@@ -106,8 +100,34 @@ class FenologikDb:
         pd.set_option('display.max_colwidth', None)
         
         return df
+    
+    # FIX: Not finished
+    def get_gridid(self, lat, lon):
+        session = self.get_session()
+        try:
+            stmt = text("""
+                SELECT id
+                FROM grid
+                WHERE ST_Contains(geometry, ST_SetSRID(ST_Point(:lon, :lat), 4326))
+            """)
+            result = session.execute(stmt, {"lon": lon, "lat": lat})
+            return result[0] if result else None
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    # Takes transform_data df as input and adds gridId column
+    # FIX: Not finished
+    def add_gridid(self, df):
+        df["gridId"] = df.apply(lambda row: self.get_gridid(row["latitude"], row["longitude"]), axis=1)
+        return df
+
+
 
     # CHANGE: Function name
+    # FIX: Not finished
     def populate_database(data):
 
         db = FenologikDb(os.environ["DATABASE_URL"])
