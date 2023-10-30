@@ -144,60 +144,6 @@ class FenologikDb:
 
         session.close()
 
-    def table_id_sequence(self):
-        engine = self.engine
-
-        with engine.connect() as conn:
-            conn.execute(text("""
-                ALTER TABLE observations 
-                ALTER COLUMN id 
-                SET DEFAULT nextval("observations_id_seq");
-            """))
-    
-    # Creates a primary key id for observations table from id column in GeoJson file
-    def generate_pk(data):
-        gdf = gpd.read_file(data)
-
-        # Mapping between URN prefix and id corresponding to data provider id plus a leading 0 if < 10, e.g. 01 for Artportalen)
-        urn_mapping = {
-            "urn:lsid:artportalen.se:sighting:": "01",
-            "NRM:RingedBirds:": "09",
-            "biologg-": "18",
-            "https://www.inaturalist.org/observations/": "19",
-            "SFTkfr:": "20",
-            "SFTspkt:": "21",
-            "SFTstd:": "22",
-            "KBV:occurrenceID:": "23"
-        }
-
-        # Extract the id column from the GeoDataFrame
-        occurrence_id = gdf["id"]
-        
-        # Split the OccurrenceId column into two columns, one with the URN prefix and one with the id
-        def split_id(occurrence_id):
-            if occurrence_id.startswith("biologg-"):
-                index = occurrence_id.rfind("-")
-            elif occurrence_id.startswith("https://www.inaturalist.org/observations/"):
-                index = occurrence_id.rfind("/")
-            elif occurrence_id.startswith("SFT"):
-                index = occurrence_id.find(":")
-            else:
-                index = occurrence_id.rfind(":")
-            
-            return [occurrence_id[:index+1], occurrence_id[index+1:]]
-            
-        split_id = occurrence_id.apply(split_id)
-
-        # Extract the URN prefix and id from the split OccurrenceId column
-        urn_prefix = split_id.apply(lambda x: x[0])
-        number = split_id.apply(lambda x: x[1])
-      
-        # Map the URN prefix to the corresponding id
-        urn_id = urn_prefix.map(urn_mapping)
-        obs_id = urn_id.astype(str) + number.astype(str)
-                
-        return obs_id
-
 ################################
 ### Add query functions here ###
 ################################
