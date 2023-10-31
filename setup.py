@@ -18,4 +18,4 @@ db.setup()
 input("Pause for manual database setup. Refer to item 5. in Database Setup in README.md. When done, press enter to continue.")
 
 # Populate tables with test data in testing/observations.csv
-API.populate_database()
+# API.populate_database()

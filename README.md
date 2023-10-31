@@ -25,5 +25,9 @@ It adds an automatic sequencer to the id column since it's lacking in the data. 
 
 ## TO DO
 - Recreate Pipfile (new environment and run needed installs)
+- Make Bokeh work with Opendata API (caching/local storage)
+    - Minimize querying of data (eg. no white tiles), is filtering possible?
 
-## Changelog:
+## Notes
+run_apps.py to start services
+Image can be reached like so: http://127.0.0.1:5000/get_tile/5/17/9
