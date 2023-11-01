@@ -89,27 +89,43 @@ class FenologikDb:
 
 
     # Transform data to match database columns
-    def transform_data(self, data):
+    def transform_data(data, batch_size=10000):
+        print("Starting data transformation...")
+        
+        # Read the GeoJson file into a GeoDataFrame
         gdf = gpd.read_file(data)
 
-        # Extract the necessary data from the GeoDataFrame
-        df = pd.DataFrame({
-            "id": self.generate_pk(data).astype(str),
-            "startDate": gdf["StartDate"],
-            "endDate": gdf["EndDate"],
-            "latitude": gdf["geometry"].y,
-            "longitude": gdf["geometry"].x,
-            "taxonId": gdf["DyntaxaTaxonId"],
-            "organismQuantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
-        })
+        # Calculate the number of batches
+        num_batches = int(len(gdf) / batch_size) + 1
 
-        # Set the display options
-        # pd.set_option('display.max_rows', None)
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.width', None)
-        pd.set_option('display.max_colwidth', None)
+        # Create an empty DataFrame to store the transformed data
+        df_full = pd.DataFrame()
         
-        return df
+        for i in range(num_batches):
+            print(f"Processing batch {i+1} of {num_batches}...")
+            start = i * batch_size
+            end = (i + 1) * batch_size
+        
+            # Extract the necessary data from the GeoDataFrame        
+            df = pd.DataFrame({
+                "id": FenologikDb.generate_pk(data).astype(str),
+                "startDate": gdf["StartDate"],
+                "endDate": gdf["EndDate"],
+                "latitude": gdf["geometry"].y,
+                "longitude": gdf["geometry"].x,
+                "taxonId": gdf["DyntaxaTaxonId"],
+                "organismQuantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
+            })
+
+            # Set the display options
+            # pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_columns', None)
+            pd.set_option('display.width', None)
+            pd.set_option('display.max_colwidth', None)
+            
+            df_full = pd.concat([df_full, df], ignore_index=True)
+            print(df_full)
+        return df_full
     
 
 

@@ -8,12 +8,12 @@ from database.seed import Seed_Db
 #Seed_Db.obs_query_loop()
 
 #FenologikDb.extract_id("testing/observations_Id_Test.geojson")
-#FenologikDb.transform_data("testing/full_dataset/1/Observations.geojson")
-#FenologikDb.populate_database("testing/full_dataset/1/Observations.geojson")
+#FenologikDb.transform_data("id_Testing.geojson/Observations.geojson")
+FenologikDb.populate_database("id_Testing.geojson/Observations.geojson")
 
 #API.auth_token()
 #API.get_observations()
-#API.obs_export_download("id_Testing")
-API.dataProvider_obs_count()
+#API.obs_export_download("medium_observations")
+#API.dataProvider_obs_count()
 
 # input("")
