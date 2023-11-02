@@ -9,7 +9,9 @@ from database.seed import Seed_Db
 
 #FenologikDb.extract_id("testing/observations_Id_Test.geojson")
 #FenologikDb.transform_data("id_Testing.geojson/Observations.geojson")
-FenologikDb.populate_database("id_Testing.geojson/Observations.geojson")
+#FenologikDb.transform_taxa("testing/taxon_list.json")
+FenologikDb.populate_observations(FenologikDb, "id_Testing.geojson/Observations.geojson")
+#FenologikDb.populate_taxa(FenologikDb, "testing/taxon_list.json")
 
 #API.auth_token()
 #API.get_observations()

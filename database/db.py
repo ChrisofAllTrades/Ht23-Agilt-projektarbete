@@ -1,3 +1,4 @@
+import json
 import os
 
 import geopandas as gpd
@@ -88,46 +89,67 @@ class FenologikDb:
 
 
 
-    # Transform data to match database columns
-    def transform_data(data, batch_size=10000):
+    # Transform observation data to match database columns
+    def transform_observations(self, data):
         print("Starting data transformation...")
         
         # Read the GeoJson file into a GeoDataFrame
         gdf = gpd.read_file(data)
 
-        # Calculate the number of batches
-        num_batches = int(len(gdf) / batch_size) + 1
+        # # Calculate the number of batches
+        # num_batches = int(len(gdf) / batch_size) + 1
 
-        # Create an empty DataFrame to store the transformed data
-        df_full = pd.DataFrame()
+        # # Create an empty DataFrame to store the transformed data
+        # df_full = pd.DataFrame()
         
-        for i in range(num_batches):
-            print(f"Processing batch {i+1} of {num_batches}...")
-            start = i * batch_size
-            end = (i + 1) * batch_size
-        
-            # Extract the necessary data from the GeoDataFrame        
-            df = pd.DataFrame({
-                "id": FenologikDb.generate_pk(data).astype(str),
-                "startDate": gdf["StartDate"],
-                "endDate": gdf["EndDate"],
-                "latitude": gdf["geometry"].y,
-                "longitude": gdf["geometry"].x,
-                "taxonId": gdf["DyntaxaTaxonId"],
-                "organismQuantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
-            })
+        # for i in range(num_batches):
+        #     print(f"Processing batch {i+1} of {num_batches}...")
+        #     start = i * batch_size
+        #     end = (i + 1) * batch_size
 
-            # Set the display options
-            # pd.set_option('display.max_rows', None)
-            pd.set_option('display.max_columns', None)
-            pd.set_option('display.width', None)
-            pd.set_option('display.max_colwidth', None)
-            
-            df_full = pd.concat([df_full, df], ignore_index=True)
-            print(df_full)
-        return df_full
+        # Extract the necessary data from the GeoDataFrame        
+        df = pd.DataFrame({
+            "id": self.generate_pk(data).astype(str),
+            "start_date": gdf["StartDate"],
+            "end_date": gdf["EndDate"],
+            "latitude": gdf["geometry"].y,
+            "longitude": gdf["geometry"].x,
+            "taxon_id": gdf["DyntaxaTaxonId"],
+            "organism_quantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
+        })
+
+        # Set the display options
+        # pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', None)
+        pd.set_option('display.max_colwidth', None)
+        
+        # df_full = pd.concat([df_full, df], ignore_index=True)
+        # print(df_full)
+        
+        return df
     
+    # Transform taxa data to match database columns
+    def transform_taxa(data):
+        with open(data, "r") as f:
+            data_dict = json.load(f)
+        
+        #print(data_dict)
+        taxa = data_dict["natureConservationListTaxa"]["0"]["taxonInformation"]
 
+        # Convert the taxonInformation list into a DataFrame
+        df = pd.DataFrame(taxa)
+        print(df)
+
+        # Rename the columns
+        df = df.rename(columns={
+            "id": "id",
+            "scientificname": "scientific_name",
+            "swedishname": "swedish_name",
+            "englishname": "english_name"
+        })
+        print(df)
+        return df
 
     # FIX: Not finished
     def get_gridid(self, y, x):
@@ -189,19 +211,33 @@ class FenologikDb:
 
 
 
-    # CHANGE: Function name
+    # Populates the observations table with data from a GeoJson file
     # FIX: Not finished
-    def populate_database(data):
-
-        db = FenologikDb(os.environ["DATABASE_URL"])
+    def populate_observations(self, data):
+        db = self(os.environ["DATABASE_URL"])
         session = db.get_session()
         conn = session.connection().connection
-        cur = conn.cursor()
+        #cur = conn.cursor()
 
         # CHANGE: File path when populating with whole dataset
-        transformed_data = FenologikDb.transform_data(data)
+        transformed_data = self.transform_observations(self, data)
         # next(f) # Skip the header row.
-        transformed_data.to_sql('observations', session.bind, if_exists='append', index=False)
+        transformed_data.to_sql("observations", session.bind, if_exists='append', index=False)
+        conn.commit()
+
+        session.close()
+
+
+
+    # Populates the taxa table with data from a JSON file
+    def populate_taxa(self, data):
+        db = self(os.environ["DATABASE_URL"])
+        session = db.get_session()
+        conn = session.connection().connection
+        #cur = conn.cursor()
+
+        transformed_data = self.transform_taxa(data)
+        transformed_data.to_sql("taxa", session.bind, if_exists='append', index=False)
         conn.commit()
 
         session.close()
