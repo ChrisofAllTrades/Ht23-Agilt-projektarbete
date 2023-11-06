@@ -8,7 +8,7 @@ from database.seed import Seed_Db
 #Seed_Db.obs_query_loop()
 
 #FenologikDb.extract_id("testing/observations_Id_Test.geojson")
-#FenologikDb.transform_data("id_Testing.geojson/Observations.geojson")
+#FenologikDb.transform_observations(FenologikDb, "id_Testing.geojson/Observations.geojson")
 #FenologikDb.transform_taxa("testing/taxon_list.json")
 FenologikDb.populate_observations(FenologikDb, "id_Testing.geojson/Observations.geojson")
 #FenologikDb.populate_taxa(FenologikDb, "testing/taxon_list.json")

@@ -1,66 +1,107 @@
-import streamlit as st
-import psycopg2
-import geopandas as gpd
-import matplotlib.pyplot as plt
-from shapely.geometry import Point, Polygon
-import numpy as np
+import json
 import os
 
-def main():
-    st.title("Fenologik")
-    # Step 1: Connect to the PostgreSQL database and fetch the data
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+import pandas as pd
+import requests
+
+from database.db import FenologikDb
+
+def get_country_polygon():
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        "country": "Sweden",
+        "format": "json",
+        "polygon_geojson": 1
+    }
+    headers = {
+        "User-Agent": "Fenologik (olsson.christoffer@pm.me)" # FIX: Add to environment variables
+    }
+
+    response = requests.get(url, params=params, headers=headers)
+
+    if response.status_code == 200:
+        data = json.loads(response.text)
+        if data:
+            return data[0]["geojson"]            
+        else:
+            return None
+    else:
+        print(f"Request failed with status code {response.status_code}")
+        return None
+    
+def convert_geojson_to_postgis(polygon_geojson):
+    # Convert the GeoJSON polygon to a string
+    polygon_geojson_str = json.dumps(polygon_geojson)
+
+    # Connect to PostgreSQL database
+    db = FenologikDb(os.environ["DATABASE_URL"])
+    session = db.get_session()
+    conn = session.connection().connection
     cur = conn.cursor()
 
-    cur.execute("SELECT latitude, longitude FROM observations WHERE taxon_id = 100006")
+    # Use ST_GeomFromGeoJSON to convert the GeoJSON polygon to a PostGIS geometry
+    cur.execute(f"""
+        CREATE TABLE polygon AS
+        SELECT ST_GeomFromGeoJSON('{polygon_geojson_str}') AS geom;
+    """)
 
-    # Step 2: Convert the data into a GeoDataFrame
-    geometry = [Point(xy) for xy in rows]
-    gdf = gpd.GeoDataFrame(geometry=geometry)
+    #postgis_geom = cur.fetchone()[0]
 
-    # Step 3: Create a grid of tiles over the area of interest
-    cur.execute("SELECT MIN(latitude), MIN(longitude), MAX(latitude), MAX(longitude) FROM observations")
-    xmin, ymin, xmax, ymax = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
 
-    width = height = 0.1  # width and height of a grid tile
-    rows = int(np.ceil((ymax-ymin) /  height))
-    cols = int(np.ceil((xmax-xmin) / width))
-    XleftOrigin = xmin
-    XrightOrigin = xmin + width
-    YtopOrigin = ymax
-    YbottomOrigin = ymax - height
-    polygons = []
-    for i in range(cols):
-        Ytop = YtopOrigin
-        Ybottom = YbottomOrigin
-        for j in range(rows):
-            polygons.append(Polygon([(XleftOrigin, Ytop), (XrightOrigin, Ytop), (XrightOrigin, Ybottom), (XleftOrigin, Ybottom)]))
-            Ytop = Ytop - height
-            Ybottom = Ybottom - height
-        XleftOrigin = XleftOrigin + width
-        XrightOrigin = XrightOrigin + width
-    grid = gpd.GeoDataFrame({'geometry':polygons}, crs="EPSG:4326")
+# polygon_geojson = get_country_polygon()
+# postgis_geom = convert_geojson_to_postgis(polygon_geojson)
+# print(type(postgis_geom))
 
-    # # Calculate the centroid of each polygon
-    # grid['centroid'] = grid['geometry'].centroid
+# Creates a square grid with 11 different zoom levels
+# When testing, remove zoom level first, then id if errors occur
+def create_grid():
+    db = FenologikDb(os.environ["DATABASE_URL"])
+    session = db.get_session()
+    conn = session.connection().connection
+    cur = conn.cursor()   
 
-    # # Sort the grid by the x and y coordinates of the centroid
-    # grid['x'] = grid['centroid'].x
-    # grid['y'] = grid['centroid'].y
-    # grid = grid.sort_values(by=['y', 'x'])
+    sizes = [51200, 25600, 12800, 6400, 3200, 1600, 800, 400, 200, 100, 50]
+    for zoom_level, size in enumerate(sizes):
+        cur.execute(f"""
+            WITH create_grid AS (
+            SELECT (ST_SquareGrid({size}, geom_3857)).*,
+                   {zoom_level} AS zoom_level
+            FROM polygon WHERE name = 'Sweden'
+            ),
 
-    # # Drop the centroid column as it's no longer needed
-    # grid = grid.drop(columns='centroid')
+            insertion AS (
+            SELECT create_grid.geom AS geom,
+                   create_grid.zoom_level AS zoom_level
+            FROM create_grid, polygon
+            WHERE ST_Intersects(create_grid.geom, polygon.geom_3857)
+            )
 
-    grid = grid.to_crs(epsg=4326)
+            INSERT INTO square_grid (id, geom, zoom_level)
+            SELECT DEFAULT, geom, zoom_level
+            FROM insertion;
+        """)
 
-    # Continue with the rest of your code
-    count = gpd.sjoin(gdf, grid, how='right', op='within').groupby('index_left').size()
-    grid['count'] = grid.index.map(count).fillna(0)
+# Counts the number of observations per tile, taxon and date
+# Untested
+def count_obs_per_tile():
+    db = FenologikDb(os.environ["DATABASE_URL"])
+    session = db.get_session()
+    conn = session.connection().connection
+    cur = conn.cursor()   
 
-    fig, ax = plt.subplots()
-    grid.plot(column='count', cmap='viridis', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True)
-    st.pyplot(fig)
+    cur.execute("""
+        SELECT COUNT(*) AS obs_count, tile_id, taxon_id, obs_date
+        FROM tile_obs_count
+        GROUP BY tile_id, taxon_id, obs_date;
+    """)
 
-if __name__ == "__main__":
-    main()
+    obs_per_tile = cur.fetchall()
+    obs_per_tile_df = pd.DataFrame(obs_per_tile, columns=["obs_count", "tile_id", "taxon_id", "obs_date"])
+    obs_per_tile_df.to_csv("obs_per_tile.csv", index=False)
+    print(obs_per_tile_df)
+
+# convert_geojson_to_postgis(get_country_polygon())
+# create_grid()

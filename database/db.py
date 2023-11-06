@@ -1,10 +1,12 @@
 import json
 import os
 
+from geoalchemy2 import Geometry, WKTElement
 import geopandas as gpd
 import pandas as pd
+from shapely import wkt # FIX: Remove if not used
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import load_only, sessionmaker
+from sqlalchemy.orm import load_only, sessionmaker # FIX: Remove if not used
 
 from database.models import Base, Observations, Taxa
 
@@ -112,8 +114,7 @@ class FenologikDb:
             "id": self.generate_pk(data).astype(str),
             "start_date": gdf["StartDate"],
             "end_date": gdf["EndDate"],
-            "latitude": gdf["geometry"].y,
-            "longitude": gdf["geometry"].x,
+            "position": gdf["geometry"],
             "taxon_id": gdf["DyntaxaTaxonId"],
             "organism_quantity": gdf["OrganismQuantityInt"].fillna(1).astype(int)
         })
@@ -125,7 +126,7 @@ class FenologikDb:
         pd.set_option('display.max_colwidth', None)
         
         # df_full = pd.concat([df_full, df], ignore_index=True)
-        # print(df_full)
+        print(df)
         
         return df
     
@@ -221,8 +222,11 @@ class FenologikDb:
 
         # CHANGE: File path when populating with whole dataset
         transformed_data = self.transform_observations(self, data)
+
+        transformed_data['position'] = transformed_data['position'].apply(lambda geom: WKTElement(geom.wkt, srid=4326))
+        
         # next(f) # Skip the header row.
-        transformed_data.to_sql("observations", session.bind, if_exists='append', index=False)
+        transformed_data.to_sql('observations', session.bind, if_exists='append', index=False, dtype={'position': Geometry('POINT', srid=4326)})
         conn.commit()
 
         session.close()
