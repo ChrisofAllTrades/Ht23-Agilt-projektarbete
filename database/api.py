@@ -61,7 +61,7 @@ class API:
 
     # Default dates for API calls
     endDate = datetime.today().date()
-    startDate = endDate - relativedelta(months=6)
+    startDate = endDate - relativedelta(days=1)
 
     # Converted to string to work with request body
     endDateStr = endDate.strftime("%Y-%m-%d")
@@ -143,6 +143,8 @@ class API:
 ### Functions for collecting observation data from SOS API ###
 ##############################################################
 
+    # Queries endpoint for observations and returns a pandas dataframe
+    # 1 000 observations max per call
     # CHANGE: Function to update database with new observations
     def get_observations():
         url = ("https://api.artdatabanken.se/species-observation-system/v1/Observations/Search"
@@ -201,3 +203,26 @@ class API:
 ##################################################
 ### Functions for updating taxon list from API ###
 ##################################################
+
+    def get_taxa():
+        url = ("https://api.artdatabanken.se/taxonlistservice/v1/taxa")
+        
+        body = {
+            "conservationListIds": [245],
+            "outputFields": [
+                "id", 
+                "scientificname", 
+                "swedishname", 
+                "englishname"
+            ]
+        }
+
+        req = request.Request(url, headers=API.hdr, data=bytes(json.dumps(body).encode("utf-8")))
+        req.get_method = lambda: "POST"
+
+        with request.urlopen(req) as response:
+            data = response.read()
+            data_json = json.loads(data)
+
+        with open("taxa.json", "w") as file:
+            json.dump(data_json, file, indent=4)

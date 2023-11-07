@@ -8,12 +8,9 @@ from shapely import wkt # FIX: Remove if not used
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import load_only, sessionmaker # FIX: Remove if not used
 
-from database.models import Base, Observations, Taxa
+from database.models import Base, Observations, Taxa, Polygon, Square_Grid, Tile_Obs_Count
 
-# To do: Finish methods for assigning gridId to observations
 # To do: Add method for processing entire dataset in chunks
-# To do: Add method for grouping observations by gridId, taxonId and datetime
-#           -  Save to new table with columns gridId, taxonId, datetime, count
 # To do: Clean up class to separate database functions from query functions
 
 
@@ -136,7 +133,7 @@ class FenologikDb:
             data_dict = json.load(f)
         
         #print(data_dict)
-        taxa = data_dict["natureConservationListTaxa"]["0"]["taxonInformation"]
+        taxa = data_dict["natureConservationListTaxa"][0]["taxonInformation"]
 
         # Convert the taxonInformation list into a DataFrame
         df = pd.DataFrame(taxa)
