@@ -3,5 +3,3 @@ streamlit_functions/__pycache__
 flask_app/__pycache__
 testing/large_dataset
 testing/full_dataset
-environment_variables.py
-__pycache__

@@ -1,6 +1,6 @@
 from . import app
 from database.models import Tile
-from database.db import fenologikDb
+from database.db import FenologikDb
 from streamlit_functions.map_api_test import MapAPI
 import io
 from flask import send_file, make_response, jsonify
@@ -14,7 +14,7 @@ import os
 #########################################
 
 
-db = fenologikDb(os.environ['DATABASE_URL'])
+db = FenologikDb(os.environ['DATABASE_URL'])
 db.setup()
 map_api = MapAPI(db)
 

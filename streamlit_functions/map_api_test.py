@@ -107,34 +107,34 @@ class MapAPI():
                             
                             last_tile = self.get_last_tile(session)
 
-                            if (matrix_id > last_tile.z) or \
-                               (matrix_id == last_tile.z and row > last_tile.y) or \
-                               (matrix_id == last_tile.z and row == last_tile.y and col > last_tile.x):
+                            # if (matrix_id > last_tile.z) or \
+                            #    (matrix_id == last_tile.z and row > last_tile.y) or \
+                            #    (matrix_id == last_tile.z and row == last_tile.y and col > last_tile.x):
 
-                                for row in range(matrix_height):
-                                    for col in range(matrix_width):
-                                        tile = self.fetch_tile(matrix_id, row, col)
-                                        if tile:
-                                            existing_tile = session.query(Tile).filter(
-                                                and_(
-                                                    Tile.z == tile.z,
-                                                    Tile.y == tile.y,
-                                                    Tile.x == tile.x
-                                                )
-                                            ).first()
+                            for row in range(matrix_height):
+                                for col in range(matrix_width):
+                                    tile = self.fetch_tile(matrix_id, row, col)
+                                    if tile:
+                                        existing_tile = session.query(Tile).filter(
+                                            and_(
+                                                Tile.z == tile.z,
+                                                Tile.y == tile.y,
+                                                Tile.x == tile.x
+                                            )
+                                        ).first()
 
-                                            if existing_tile is None:
-                                                tiles_to_add.append(tile)
-                                        else:
-                                            empty_tile_count += 1
-                                            if empty_tile_count >= max_empty_tiles:
-                                                break
-                                        if len(tiles_to_add) >= bulk_size:
-                                            session.bulk_save_objects(tiles_to_add)
-                                            session.commit()
-                                            tiles_to_add = []
-                                    if empty_tile_count >= max_empty_tiles:
-                                        break
+                                        if existing_tile is None:
+                                            tiles_to_add.append(tile)
+                                    else:
+                                        empty_tile_count += 1
+                                        if empty_tile_count >= max_empty_tiles:
+                                            break
+                                    if len(tiles_to_add) >= bulk_size:
+                                        session.bulk_save_objects(tiles_to_add)
+                                        session.commit()
+                                        tiles_to_add = []
+                                if empty_tile_count >= max_empty_tiles:
+                                    break
                         except Exception as e:
                             print(f'An error occurred: {e}')
                             traceback.print_exc()

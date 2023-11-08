@@ -1,23 +1,40 @@
-import streamlit as st
-import bokeh
-import bokeh.plotting as bp
-
-################################################
-#  - Initializing and fetching data for map -  #
-################################################
-
-
+import pydeck as pdk
 
 ##################################################
 #  - Functions for map visualisation creation -  #
 ##################################################
 
-#Now officially remade for usage in Bokeh:
+def get_tile_layer(data):
+    return pdk.Layer(
+        'TileLayer',
+        data=data,
+        opacity=0.5,
+        filled=True,
+    )
 
-def initial_plot():
 
-    pass
+def get_grid_layer(data):
+    return pdk.Layer(
+        'MVTLayer',
+        data=data,
+        pickable=False,
+        cell_size_pixels=20,
+        opacity=0.8,
+        get_position='[longitude, latitude]',
+        get_weight='count'
+    )
 
-def create_glyphs():
-    
-    pass
+
+
+def get_geojson_layer(data):
+    return pdk.Layer(
+        'GeoJsonLayer',
+        data=data,
+        opacity=0.4,
+        stroked=False,
+        filled=True,
+        extruded=False,
+        wireframe=True,
+    )
+
+
