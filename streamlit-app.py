@@ -1,10 +1,11 @@
 import streamlit as st
 from datetime import datetime
-from database.db import FenologikDb
 from database.models import Taxa
 from streamlit_functions.visualisation_functions import get_grid_layer
 import pydeck as pdk
 import os
+
+from database.db import FenologikDb
 
 db = FenologikDb(os.environ['DATABASE_URL'])
 
@@ -32,7 +33,7 @@ with st.form("filters_form"):
     submitted = st.form_submit_button("Submit")
 
 if submitted:
-    list_of_filters = [species, startdate, enddate]
+    list_of_filters = [db.get_taxon_id(species), startdate, enddate]
     st.write(list_of_filters)
     #Here we should send the data (list_of_filters) to the database function.
     #In order to do an animation we need to iterate through objects, and or update the layer structure(?)
