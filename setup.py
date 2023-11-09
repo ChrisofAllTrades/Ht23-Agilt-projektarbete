@@ -30,8 +30,4 @@ input("Square grid created. Press enter to continue.")
 # Count observations per tile and add them to the tile_obs_count table
 # Currently makes the count on zoom_level 1, which is the smallest grid. Later on the higher zoom levels will use the counts from the lower ones
 ObservationGrid.count_obs_per_tile()
-input("Count count complete. Press enter to continue.")
-
-# Joins the tile_obs_count table with the square_grid table 
-ObservationGrid.grid_visualization()
-input("Job done!")
+input("Job done! Continue with the next step in README.md")

@@ -127,12 +127,12 @@ class ObservationGrid:
                 square_grid.id AS tile_id,
                 taxa.id AS taxon_id,
                 DATE(observations.start_date) AS obs_date,
-                COUNT(observations.organism_quantity) AS obs_count
+                SUM(observations.organism_quantity) AS obs_count
             FROM
                 square_grid
                 JOIN observations ON ST_Intersects(square_grid.geom, ST_Transform(observations.position, 3857))
                 JOIN taxa ON observations.taxon_id = taxa.id
-            WHERE square_grid.zoom_level = 0
+            WHERE square_grid.zoom_level = 1
             GROUP BY
                 square_grid.id,
                 DATE(observations.start_date),

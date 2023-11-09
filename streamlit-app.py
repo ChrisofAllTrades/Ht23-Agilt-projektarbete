@@ -13,7 +13,8 @@ db = FenologikDb(os.environ['DATABASE_URL'])
 #  - Initial viewstate and filters -  #
 #######################################
 
-grid_layer = get_grid_layer("http://localhost:7800/public.square_grid/{z}/{x}/{y}.pbf") #Byt ut med tileserv funktion url.
+list_of_filters = [102966, "2023-11-01", "2023-11-09"]
+grid_layer = get_grid_layer(f'http://localhost:3000/square_grid_obs/{{z}}/{{x}}/{{y}}?taxon_id={list_of_filters[0]}&start_date={list_of_filters[1]}&end_date={list_of_filters[2]}') #Byt ut med tileserv funktion url.
 
 view_state = pdk.ViewState(
     latitude=61.953,

@@ -19,11 +19,12 @@ def get_grid_layer(data):
         data=data,
         pickable=False,
         cell_size_pixels=20,
-        opacity=0.8,
+        get_fill_color="[128 + (properties.obs_count / 50), 50 + (properties.obs_count / 500), 128 + (properties.obs_count / 500), (properties.obs_count / 43.5) + 1]",
+        getLineColor="[128 + (properties.obs_count / 50), 50 + (properties.obs_count / 500), 128 + (properties.obs_count / 500), (properties.obs_count / 43.5) + 5]",
+        lineWidthMinPixels=1,
         get_position='[longitude, latitude]',
         get_weight='count'
     )
-
 
 
 def get_geojson_layer(data):

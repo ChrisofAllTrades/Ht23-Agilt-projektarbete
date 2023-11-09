@@ -16,12 +16,39 @@ export DATABASE_URL=postgresql://username:password@localhost:5432/yourdatabase
 export PYTHONPATH=/[path_to_git_repo]/Ht23-Agilt-projektarbete:$PYTHONPATH
 ```
 
-## TO DO
-- Redo to do
-- Recreate Pipfile (new environment and run needed installs)
-- Make Bokeh work with Opendata API (caching/local storage)
-    - Minimize querying of data (eg. no white tiles), is filtering possible?
+5. Run this in the query tool in pgAdmin to add the square_grid_obs function to the database that Martin uses to visualise:
+```sql
+CREATE OR REPLACE
+FUNCTION public.square_grid_obs(z integer, x integer, y integer, query_params json)
+RETURNS bytea
+AS $$
+DECLARE
+  mvt bytea;
+BEGIN
+  SELECT INTO mvt ST_AsMVT(tile, 'square_grid_obs', 4096, 'geom') FROM (
+    SELECT
+        ST_AsMVTGeom(ST_Transform(square_grid.geom, 3857), ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom,
+        tile_obs_count.obs_count  -- Include the obs_count column
+    FROM
+        square_grid
+        INNER JOIN tile_obs_count ON square_grid.id = tile_obs_count.tile_id  -- Join on id/tile_id
+    WHERE ST_Intersects(square_grid.geom, ST_TileEnvelope(z, x, y))  -- Only include squares that intersect the tile bounds
+    AND tile_obs_count.taxon_id = (query_params->>'taxon_id')::integer  -- Filter rows by taxon_id
+    AND tile_obs_count.obs_date >= (query_params->>'start_date')::date  -- Filter rows by start_date
+    AND tile_obs_count.obs_date <= (query_params->>'end_date')::date  -- Filter rows by end_date
+  ) as tile WHERE geom IS NOT NULL;
 
-## Notes
-run_apps.py to start services
-Image can be reached like so: http://127.0.0.1:5000/get_tile/5/17/9
+  RETURN mvt;
+END
+$$ LANGUAGE plpgsql STABLE PARALLEL SAFE;
+```
+
+6. Start the Martin tile server
+```
+cd martin
+./martin
+```
+
+It should output a bunch of stuff, hopefully including `Discovered source square_grid_obs from function public.square_grid_obs(integer, integer, integer, json) -> bytea`. Let it run in its own terminal.
+
+7. Open a new terminal and run `streamlit run streamlit-app.py`. If you want to test different combinations of visualisations, you can select a species from the list, copy the taxon_id and paste it in the `list_of_filters` list above the `grid_layer` url. Date doesn't do much with the test dataset as it only contains observations for a couple of days.
