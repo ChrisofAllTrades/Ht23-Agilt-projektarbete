@@ -5,6 +5,8 @@ from geoalchemy2 import Geometry, WKTElement
 import geopandas as gpd
 import pandas as pd
 from shapely import wkt # FIX: Remove if not used
+from shapely.wkb import loads
+from shapely.geometry import mapping
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import load_only, sessionmaker # FIX: Remove if not used
 
@@ -247,6 +249,27 @@ class FenologikDb:
 ### Add query functions here ###
 ################################
 
+    def acquire_sweden_geometry(self):
+        session = self.get_session()
+        sql = text("SELECT ST_AsBinary(geom) as geom FROM polygon;")
+        result = session.execute(sql).fetchone()
+        session.close()
+
+        binary_geom = result['geom']
+
+        geometry = loads(binary_geom)
+
+        # Convert to a GeoJSON-like dictionary
+        geojson_geometry = mapping(geometry)
+
+        # Serialize to a GeoJSON string
+        geojson_string = json.dumps({
+            "type": "Feature",
+            "geometry": geojson_geometry
+        })
+
+        return geojson_string
+
 
     # Functions to create and update database
     def post_taxa(taxa):
@@ -296,47 +319,28 @@ class FenologikDb:
     def get_unique_species_for_dropdown(self, model):
         session = self.get_session()
         try:
-            query = session.query(model).distinct(model.swedishName)
-            result = [row.swedishName for row in query.all()]
+            query = session.query(model.swedish_name).filter(
+            model.scientific_name.like('% %'),
+            model.swedish_name.isnot(None)
+        ).distinct()
+            result = [row.swedish_name for row in query.all()]
         except Exception as e:
             print(f"An error occurred: {e}")
             result = None
         finally:
             session.close()
         return result
-    
-
-
-    def get_unique_species_for_dropdown_test(self, model):
-        try:
-            session = self.get_session()
-            session.begin()
-            query = session.query(model).distinct(model.swedishName)
-            results = query.all()
-
-            result = [row.swedishName for row in results]
-            session.commit()
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            print(f"Error type: {type(e)}")
-            session.rollback()
-            result = None
-        finally:
-            session.close()
-        return result
-
-
 
     def get_taxon_id(self, swedish_name):
         session = self.get_session()
-        result = session.query(Observations, Taxa).\
-                join(Taxa, Observations.taxonId == Taxa.id).\
-                filter(Taxa.swedishName == swedish_name).\
-                first()
-    
-        session.close()
-    
-        if result:
-            return result.Taxa.id  # Returnerar taxonid från Taxa-tabellen
-        else:
-            return None
+        try:
+            # Query the ID from Taxa table where the Swedish name matches
+            result = session.query(Taxa.id).filter(Taxa.swedish_name == swedish_name).first()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            result = None
+        finally:
+            session.close()
+
+        # Return the ID if the result is found, otherwise return None
+        return result.id if result else None
