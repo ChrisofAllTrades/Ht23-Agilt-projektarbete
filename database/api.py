@@ -72,7 +72,7 @@ class API:
     hdr = {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
-        'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
+        #'Ocp-Apim-Subscription-Key': os.environ['API_KEY'],
     }
 
     # Body for API calls

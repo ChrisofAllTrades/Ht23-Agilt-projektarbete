@@ -1,9 +1,9 @@
 import streamlit as st
-from datetime import datetime
 from database.models import Taxa
-from streamlit_functions.visualisation_functions import get_grid_layer
+from streamlit_functions.visualisation_functions import get_grid_layer, get_date_from_string, get_daily_data, get_daily_urls
 import pydeck as pdk
 import os
+import datetime
 
 from database.db import FenologikDb
 
@@ -13,19 +13,44 @@ db = FenologikDb(os.environ['DATABASE_URL'])
 #  - Initial viewstate and filters -  #
 #######################################
 
-list_of_filters = [102966, "2023-11-01", "2023-11-09"]
-grid_layer = get_grid_layer(f'http://localhost:3000/square_grid_obs/{{z}}/{{x}}/{{y}}?taxon_id={list_of_filters[0]}&start_date={list_of_filters[1]}&end_date={list_of_filters[2]}') #Byt ut med tileserv funktion url.
+query_params = st.experimental_get_query_params()
+if 'day' in query_params:
+    # Set the current day based on the query parameter
+    st.session_state['current_day'] = int(query_params['day'][0])
+else:
+    # If 'day' is not in query parameters, initialize it to 0 and set the query parameter
+    st.session_state['current_day'] = 0
+    st.experimental_set_query_params(day=0)
 
-view_state = pdk.ViewState(
-    latitude=61.953,
-    longitude=14.816,
-    zoom=3.5,
-    min_zoom=3.5,
-    max_zoom=16,
-)
+st.sidebar.header("Date Range Navigation")
+
+def update_map(grid_layer):
+    view_state = pdk.ViewState(
+        latitude=61.953,
+        longitude=14.816,
+        zoom=3.5,
+        min_zoom=3.5,
+        max_zoom=16,
+    )
+
+    deck = pdk.Deck(
+        initial_view_state=view_state,
+        layers=[grid_layer],
+        #map_style="mapbox://styles/mapbox/outdoors-v12",
+    )
+
+    return deck
+
+if 'filters' not in st.session_state:
+    st.session_state['filters'] = [102966, datetime.date(2023, 11, 2), datetime.date(2023, 11, 9)]
 
 species_list = db.get_unique_species_for_dropdown(Taxa)
 map_placeholder = st.empty()
+
+query_params = st.experimental_get_query_params()
+if 'day' in query_params:
+    day_index = int(query_params['day'][0])
+    st.session_state['current_day'] = day_index
 
 with st.form("filters_form"):
     species = st.selectbox("Select species", species_list)
@@ -35,27 +60,58 @@ with st.form("filters_form"):
 
 if submitted:
     list_of_filters = [db.get_taxon_id(species), startdate, enddate]
-    st.write(list_of_filters)
-    #Here we should send the data (list_of_filters) to the database function.
-    #In order to do an animation we need to iterate through objects, and or update the layer structure(?)
+    st.session_state["filters"] = list_of_filters
+    st.write(st.session_state["filters"])
 
-#st.write(startdate)
-#st.write(enddate)
-#st.write(db.get_taxon_id(species))
 
-####################################
-#  - Deck and map initialization-  #
-####################################
+if 'filters' in st.session_state:
+    # Unpack the session state values
+    species_id, start_date_str, end_date_str = st.session_state['filters']
+    # Convert string dates to datetime.date objects
+    start_date = get_date_from_string(start_date_str)
+    end_date = get_date_from_string(end_date_str)
+    
+    daily_data = get_daily_data(species_id, start_date, end_date)
+    daily_urls = get_daily_urls(daily_data)
 
-deck = pdk.Deck(
-    initial_view_state=view_state,
-    layers=[grid_layer],
-    map_style="mapbox://styles/mapbox/outdoors-v12",
-)
+    total_days = (end_date - start_date).days + 1
+    st.sidebar.write(f"**Date Range:** {start_date_str} -> {end_date_str}")
+    st.sidebar.write(f"**Total Days:** {total_days} day(s)")
 
-map_placeholder.pydeck_chart(deck)
+    if 'current_day' not in st.session_state or 'day' in query_params:
+        st.session_state['current_day'] = 0 if 'day' not in query_params else int(query_params['day'][0])
 
-#Put in the map and deck down here in case we need to resort to some way of creating the map with the data from the form -> db functions -> map.
+    day_being_viewed = st.sidebar.container()
+
+    prev_col, next_col = st.sidebar.columns(2)
+    prev_col, next_col = st.sidebar.columns(2)
+    with prev_col:
+        if st.button('Previous Day'):
+            st.session_state['current_day'] = max(0, st.session_state['current_day'] - 1)
+            st.experimental_set_query_params(day=st.session_state['current_day'])
+
+    with next_col:
+        if st.button('Next Day'):
+            st.session_state['current_day'] = min(total_days - 1, st.session_state['current_day'] + 1)
+            st.experimental_set_query_params(day=st.session_state['current_day'])
+    
+
+    ####################################
+    #  - Deck and map initialization-  #
+    ####################################
+
+
+# Use the current day index to get the URL for the grid layer
+if 'current_day' in st.session_state and daily_urls:
+    current_url = daily_urls[st.session_state['current_day']]
+    day_being_viewed.write(f"**Day being viewed:** {st.session_state['current_day'] + 1}")
+    grid_layer = get_grid_layer(current_url)
+    deck = update_map(grid_layer)
+    map_placeholder.pydeck_chart(deck)
+
+    
+
+
 
 
 
