@@ -70,12 +70,12 @@ class ObservationGrid:
         cur = conn.cursor()   
 
         # sizes = [51200, 25600, 12800, 6400, 3200, 1600, 800, 400, 200, 100, 50]
-        sizes = [51200, 25600]
+        sizes = [25600]
         for zoom_level, size in enumerate(sizes):
             cur.execute(f"""
                 WITH create_grid AS (
                 SELECT (ST_SquareGrid({size}, geom_3857)).*,
-                    {zoom_level} AS zoom_level
+                    1 AS zoom_level
                 FROM polygon WHERE name = 'Sweden'
                 ),
 
