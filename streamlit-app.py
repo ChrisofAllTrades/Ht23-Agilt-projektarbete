@@ -67,7 +67,7 @@ if submitted:
 if 'filters' in st.session_state:
     # Unpack the session state values
     species_id, start_date_str, end_date_str = st.session_state['filters']
-    # Convert string dates to datetime.date objects
+    # Convert string dates to datetime.date objects if they are string dates (returns datetime.date object otherwise)
     start_date = get_date_from_string(start_date_str)
     end_date = get_date_from_string(end_date_str)
     
@@ -83,7 +83,6 @@ if 'filters' in st.session_state:
 
     day_being_viewed = st.sidebar.container()
 
-    prev_col, next_col = st.sidebar.columns(2)
     prev_col, next_col = st.sidebar.columns(2)
     with prev_col:
         if st.button('Previous Day'):
