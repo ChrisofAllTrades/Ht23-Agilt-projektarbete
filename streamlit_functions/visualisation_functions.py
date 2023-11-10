@@ -40,6 +40,31 @@ def get_daily_urls(daily_data):
     }
     return daily_urls
 
+### WEEKLY ###
+
+def get_weekly_urls(weekly_data):
+    weekly_urls = {
+        index: f"http://localhost:3000/square_grid_obs/{{z}}/{{x}}/{{y}}?taxon_id={details['species_id']}&start_date={details['start_date']}&end_date={details['end_date']}"
+        for index, details in weekly_data.items()
+    }
+    print(weekly_urls)
+    return weekly_urls
+
+def get_weekly_data(species_id, start_date, end_date):
+    date_list = [start_date + datetime.timedelta(days=7*n) for n in range(int((end_date - start_date).days/7) + 1)]
+    weekly_data = {
+        index: {
+            "species_id": species_id,
+            "start_date": single_date.strftime('%Y-%m-%d'),
+            "end_date": (single_date + datetime.timedelta(days=6)).strftime('%Y-%m-%d')
+        }
+        for index, single_date in enumerate(date_list)
+    }
+    print(weekly_data)
+    return weekly_data
+
+
+
 def get_tile_layer(data):
     return pdk.Layer(
         'TileLayer',
@@ -55,10 +80,9 @@ def get_grid_layer(data):
         data=data,
         pickable=False,
         cell_size_pixels=20,
-        get_fill_color="[128 + (properties.obs_count / 50), 50 + (properties.obs_count / 500), 128 + (properties.obs_count / 500), (properties.obs_count / 43.5) + 1]",
-        getLineColor="[128 + (properties.obs_count / 50), 50 + (properties.obs_count / 500), 128 + (properties.obs_count / 500), (properties.obs_count / 43.5) + 5]",
+        get_fill_color="[128 + (properties.obs_count), 50 + (properties.obs_count / 50), 128 + (properties.obs_count / 50), (properties.obs_count) + 100]",
+        getLineColor="[128 + (properties.obs_count), 50 + (properties.obs_count / 50), 128 + (properties.obs_count / 50), (properties.obs_count) + 150]",
         lineWidthMinPixels=1,
         get_position='[longitude, latitude]',
         get_weight='count'
     )
-
