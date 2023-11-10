@@ -217,18 +217,26 @@ class FenologikDb:
         db = self(os.environ["DATABASE_URL"])
         session = db.get_session()
         conn = session.connection().connection
-        #cur = conn.cursor()
 
-        # CHANGE: File path when populating with whole dataset
-        transformed_data = self.transform_observations(self, data)
+        try:
+            # CHANGE: File path when populating with whole dataset
+            transformed_data = self.transform_observations(self, data)
 
-        transformed_data['position'] = transformed_data['position'].apply(lambda geom: WKTElement(geom.wkt, srid=4326))
-        
-        # next(f) # Skip the header row.
-        transformed_data.to_sql('observations', session.bind, if_exists='append', index=False, dtype={'position': Geometry('POINT', srid=4326)})
-        conn.commit()
+            # Get all taxon_ids from the taxa table
+            taxa_ids = pd.read_sql('SELECT id FROM taxa', conn)['id']
 
-        session.close()
+            # Filter out rows where taxon_id doesn't exist in taxa table
+            transformed_data = transformed_data[transformed_data['taxon_id'].isin(taxa_ids)]
+
+            transformed_data['position'] = transformed_data['position'].apply(lambda geom: WKTElement(geom.wkt, srid=4326))
+            
+            # next(f) # Skip the header row.
+            transformed_data.to_sql('observations', session.bind, if_exists='append', index=False, dtype={'position': Geometry('POINT', srid=4326)})
+            conn.commit()
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            session.close()
 
 
 
@@ -248,7 +256,7 @@ class FenologikDb:
 ################################
 ### Add query functions here ###
 ################################
-
+        
     def acquire_sweden_geometry(self):
         session = self.get_session()
         sql = text("SELECT ST_AsBinary(geom) as geom FROM polygon;")

@@ -16,7 +16,7 @@ input("Tables created. Press enter to continue.")
 
 # Populate taxa and observations tables (the latter with test data from a single day)
 FenologikDb.populate_taxa(FenologikDb, "taxa.json")
-FenologikDb.populate_observations(FenologikDb, "medium_observations/Observations.geojson")
+FenologikDb.populate_observations(FenologikDb, "large_observations/Observations.geojson")
 input("Database population complete. Press enter to continue.")
 
 # Get polygon of Sweden's borders from OpenStreetMap and add it to the polygon table

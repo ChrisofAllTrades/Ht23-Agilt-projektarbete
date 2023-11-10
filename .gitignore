@@ -3,3 +3,4 @@ streamlit_functions/__pycache__
 flask_app/__pycache__
 testing/large_dataset
 testing/full_dataset
+large_observations
